@@ -1,0 +1,224 @@
+================================================================
+DOCUMENTO MESTRE — FONTE ÚNICA DE VERDADE (CONTRATO)
+PROJETO: NÃO TOME MULTA
+VERSÃO: MVP REAL v1.1 — USO EM PRODUÇÃO
+STATUS: ATIVO — CÓDIGO COM USO REAL
+PADRÃO: INSTITUCIONAL / BANCÁRIO PREMIUM (SEM PROMESSA)
+================================================================
+
+Este documento consolida TODAS as decisões técnicas,
+arquiteturais, visuais, conceituais e operacionais
+do projeto NÃO TOME MULTA.
+
+Ele é a ÚNICA fonte de verdade do projeto.
+
+Qualquer código, tela, fluxo, componente, copy ou
+decisão técnica que não esteja EXPLICITAMENTE alinhada
+a este documento é considerada INVÁLIDA.
+
+Este projeto é um MVP DE USO REAL.
+Não é protótipo, não é conceito, não é experimento visual.
+
+================================================================
+1. DEFINIÇÃO FORMAL DO MVP REAL v1.1
+================================================================
+
+O MVP REAL v1.1 é definido como:
+
+- Aplicativo funcional
+- Usável por usuários reais
+- Com fluxo completo e coerente
+- Sem funcionalidades fictícias
+- Sem estados “mockados” sem propósito
+- Sem telas decorativas
+- Sem código especulativo
+
+REGRA FUNDAMENTAL:
+
+Todo código implementado DEVE:
+- Ser necessário para o funcionamento real do produto
+- Ter impacto direto na experiência do usuário
+- Resolver um problema descrito neste documento
+
+Código “para depois”, “para escalar”, “para o futuro” é PROIBIDO.
+
+================================================================
+2. CONTEXTO OPERACIONAL GERAL
+================================================================
+[SEM ALTERAÇÕES]
+
+================================================================
+3. PRINCÍPIO SOBERANO DO PRODUTO
+================================================================
+
+O NÃO TOME MULTA deve:
+
+- Centralizar o controle operacional do usuário
+  em um único ponto previsível (Home)
+- Reduzir ansiedade por clareza de estado
+- Operar com postura institucional e regulatória
+- Manter linguagem formal casual, objetiva e contida
+
+A Home passa a ser o **fluxo central soberano** do MVP.
+
+================================================================
+4. STACK TECNOLÓGICA AUTORIZADA (FECHADA)
+================================================================
+[SEM ALTERAÇÕES]
+
+================================================================
+5. ARQUITETURA DE FLUXO (ATUALIZADA)
+================================================================
+
+Fluxo macro obrigatório:
+
+1. app/index.tsx
+   - Entrada institucional (visual)
+   - Nenhuma lógica de decisão
+
+2. app/_layout.tsx
+   - AuthGate soberano
+   - Decide acesso exclusivamente via Clerk
+
+3. auth/login.tsx
+   - Login por email ou Google
+   - Sem navegação manual
+
+4. Home (painel + fluxo inicial)
+   - Ponto central do produto
+   - Onde a análise ocorre
+   - Onde decisões iniciais são tomadas
+   - Onde o usuário compreende todo o estado do sistema
+
+5. Defesas (continuação especializada)
+   - Fluxo complementar
+   - Acessado apenas após geração explícita na Home
+
+REGRAS ABSOLUTAS:
+- A Home é soberana no fluxo inicial
+- Defesas NÃO inicia lógica própria
+- router.replace em transições finais
+- Nenhuma tela duplica decisões já tomadas
+
+================================================================
+6. PADRÃO VISUAL GLOBAL
+================================================================
+[SEM ALTERAÇÕES]
+
+================================================================
+7. PALETA DE CORES OFICIAL
+================================================================
+[SEM ALTERAÇÕES]
+
+================================================================
+8. HOME — PAPEL OPERACIONAL (REDEFINIDO)
+================================================================
+
+A Home é o CENTRO OPERACIONAL DO PRODUTO.
+
+Funções da Home:
+- Receber o usuário autenticado
+- Iniciar e acompanhar a análise
+- Exibir estados claros e determinísticos
+- Controlar o fluxo de geração de defesa
+- Preparar o usuário para a etapa administrativa
+
+A Home:
+- Pode manter estado de fluxo local
+- Pode gerar rascunho de defesa
+- Pode permitir edição do texto gerado
+- Decide quando o usuário segue para Defesas
+
+PROIBIDO NA HOME:
+- Envio automático
+- Integração externa
+- Promessa de resultado
+- Qualquer automação irreversível
+
+================================================================
+9. COMPONENTES DA HOME (MVP REAL v1.1)
+================================================================
+
+Componentes ativos:
+
+- UploadCard (CTA primário)
+- AnalysisResultCard
+- RequiredDocumentsCard
+- DefenseCard
+- NotificationsModal
+
+Regras:
+- Apenas UM CTA primário por estado
+- Fluxo sempre visível e compreensível
+- Estado explícito, nunca implícito
+
+================================================================
+10. UPLOADCARD — PADRÃO CONGELADO
+================================================================
+[SEM ALTERAÇÕES]
+
+================================================================
+11. MODELO DE DADOS — ANÁLISE (LOCAL v1)
+================================================================
+[SEM ALTERAÇÕES]
+
+================================================================
+12. GERAÇÃO DE DEFESA — MVP REAL
+================================================================
+
+A geração de defesa no MVP v1.1 é:
+
+- Local
+- Determinística
+- Baseada exclusivamente nos dados analisados
+- Sem uso de IA externa
+- Sem linguagem promocional
+
+O texto gerado é:
+- Um rascunho institucional
+- Editável pelo usuário
+- Sem envio automático
+
+================================================================
+13. DEFESAS ADMINISTRATIVAS — PAPEL ATUALIZADO
+================================================================
+
+Tela: defesas.tsx
+
+Função:
+- Continuação do fluxo iniciado na Home
+- Revisão final do texto
+- Exibição de instruções administrativas
+
+A tela Defesas:
+- NÃO gera defesa
+- NÃO decide elegibilidade
+- NÃO inicia fluxo
+
+================================================================
+14. PADRÃO DE COMPONENTIZAÇÃO
+================================================================
+[SEM ALTERAÇÕES]
+
+================================================================
+15. REGRAS ABSOLUTAS DE CÓDIGO
+================================================================
+[SEM ALTERAÇÕES]
+
+================================================================
+16. REGRA FINAL (CONTRATO)
+================================================================
+
+Este documento é um CONTRATO.
+
+- Não interpretar
+- Não flexibilizar
+- Não assumir requisitos implícitos
+- Não “melhorar” sem autorização
+- Não antecipar futuro
+
+Se não está aqui, NÃO EXISTE.
+
+================================================================
+FIM DO DOCUMENTO
+================================================================

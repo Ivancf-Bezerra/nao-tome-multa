@@ -1,60 +1,53 @@
 import { View, Pressable, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { useUser } from '@clerk/clerk-expo';
 
 type HomeHeaderProps = {
-  onOpenNotifications: () => void;
+  onOpenNotifications?: () => void;
 };
 
 export default function HomeHeader({
   onOpenNotifications,
 }: HomeHeaderProps) {
-  const router = useRouter();
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
 
   return (
-    <View className="flex-row items-center justify-between px-6 pt-4 pb-6">
-      {/* AJUSTES */}
-      <Pressable
-        onPress={() => router.push('/sistema')}
-        className="h-10 w-10 items-center justify-center rounded-full bg-slate-800"
-      >
+    <View className="flex-row items-center justify-between px-6 py-2 w-full">
+      <View className="h-10 w-10 items-center justify-center rounded-full bg-slate-800/40 border border-slate-700/30">
         <Ionicons
           name="settings-outline"
-          size={18}
-          color="#e5e7eb"
+          size={20}
+          color="#94a3b8"
         />
-      </Pressable>
+      </View>
 
-      {/* AVATAR + NOTIFICAÇÕES */}
-      <View className="flex-row items-center space-x-3">
-        {/* AVATAR */}
-        <View className="h-9 w-9 rounded-full overflow-hidden bg-slate-700">
-          {user?.imageUrl ? (
+      <View className="flex-row items-center">
+        <View className="h-10 w-10 overflow-hidden rounded-full border border-slate-700 bg-slate-800">
+          {isLoaded && user?.imageUrl ? (
             <Image
               source={{ uri: user.imageUrl }}
               className="h-full w-full"
+              resizeMode="cover"
             />
           ) : (
             <View className="flex-1 items-center justify-center">
               <Ionicons
-                name="person-outline"
+                name="person"
                 size={18}
-                color="#e5e7eb"
+                color="#cbd5e1"
               />
             </View>
           )}
         </View>
 
-        {/* NOTIFICAÇÕES */}
         <Pressable
           onPress={onOpenNotifications}
-          className="h-10 w-10 items-center justify-center rounded-full bg-slate-800"
+          style={{ marginLeft: 16 }}
+          className="h-10 w-10 items-center justify-center rounded-full bg-slate-800 border border-slate-700 active:bg-slate-700"
         >
           <Ionicons
             name="notifications-outline"
-            size={18}
+            size={20}
             color="#e5e7eb"
           />
         </Pressable>

@@ -8,7 +8,7 @@ import { Slot, useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
 
-import { AnalysisProvider } from '../context/AnalysisContext';
+import { TechnicalProfileProvider } from '../context/TechnicalProfileContext';
 
 const publishableKey =
   process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
@@ -44,25 +44,28 @@ function AuthGate() {
 
     const rootSegment = segments[0];
     const inAuthGroup = rootSegment === 'auth';
+    const inTabsGroup = rootSegment === '(tabs)';
+    const inProfileGroup = rootSegment === 'profile';
     const isSplash = rootSegment === undefined;
 
-    if (!isSignedIn && !inAuthGroup && !isSplash) {
-      router.replace('/auth/login');
+    if (!isSignedIn) {
+      if (!inAuthGroup && !isSplash) {
+        router.replace('/auth/login');
+      }
       return;
     }
 
-    if (isSignedIn && inAuthGroup) {
-      router.replace('/(tabs)/home');
+    if (isSignedIn) {
+      if (!inTabsGroup && !inProfileGroup && !isSplash) {
+        router.replace('/(tabs)/home');
+      }
     }
   }, [isSignedIn, isLoaded, segments]);
 
-  /**
-   * ⚠️ O PROVIDER PRECISA ENVOLVER O SLOT
-   */
   return (
-    <AnalysisProvider>
+    <TechnicalProfileProvider>
       <Slot />
-    </AnalysisProvider>
+    </TechnicalProfileProvider>
   );
 }
 

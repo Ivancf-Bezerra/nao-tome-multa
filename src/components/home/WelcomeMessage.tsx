@@ -16,14 +16,15 @@ export default function WelcomeMessage() {
       </Text>
 
       <Text className="mt-1 text-lg font-semibold text-white">
-        Painel de análise de infrações
+        Organização técnica de autuações
       </Text>
 
-<Text className="mt-2 text-sm leading-relaxed text-slate-400">
-  Aqui você pode realizar a análise técnica de autos de infração de trânsito,
-  organizar as informações do processo e preparar textos administrativos com
-  base em critérios objetivos da legislação aplicável.
-</Text>
+      <Text className="mt-2 text-sm leading-relaxed text-slate-400">
+        Este aplicativo foi desenvolvido para auxiliar na organização
+        e verificação técnica de informações relacionadas a autos de
+        infração de trânsito, com base em dados objetivos e registros
+        oficiais.
+      </Text>
 
     </View>
   );

@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { View, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function TabLayout() {
   return (
@@ -25,78 +25,13 @@ export default function TabLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Painel',
-          tabBarIcon: ({ color }) => (
-            <View className="items-center justify-center">
-              <View
-                style={{
-                  width: 18,
-                  height: 18,
-                  borderWidth: 1.5,
-                  borderColor: color,
-                  borderRadius: 4,
-                }}
-              />
-            </View>
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="ativas"
-        options={{
-          title: 'Ativas',
-          tabBarIcon: ({ color }) => (
-            <View className="items-center justify-center">
-              <View
-                style={{
-                  width: 18,
-                  height: 18,
-                  borderWidth: 1.5,
-                  borderColor: color,
-                  borderRadius: 9,
-                }}
-              />
-            </View>
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="concluidas"
-        options={{
-          title: 'Concluídas',
-          tabBarIcon: ({ color }) => (
-            <View className="items-center justify-center">
-              <View
-                style={{
-                  width: 18,
-                  height: 18,
-                  borderWidth: 1.5,
-                  borderColor: color,
-                }}
-              />
-            </View>
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="sistema"
-        options={{
-          title: 'Sistema',
-          tabBarIcon: ({ color }) => (
-            <View className="items-center justify-center">
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: '700',
-                  color,
-                }}
-              >
-                i
-              </Text>
-            </View>
+          title: 'Início',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? 'home' : 'home-outline'}
+              size={20}
+              color={color}
+            />
           ),
         }}
       />
