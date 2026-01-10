@@ -3,13 +3,13 @@ import { useMemo, useState } from 'react';
 import Input from './Input';
 import { formatPlate, onlyNumbers } from './masks';
 
-// 1. Adicionado campo 'color' à interface
 export interface VehicleData {
   plate: string;
   renavam: string;
   model: string;
-  color: string; // <--- NOVO
   city: string;
+  uf: string;        // OBRIGATÓRIO
+  color: string;   // INFORMATIVO (não técnico)
 }
 
 export default function VehicleForm({
@@ -19,48 +19,58 @@ export default function VehicleForm({
   data: VehicleData;
   onChange: (data: VehicleData) => void;
 }) {
-  // 2. Adicionado estado 'color'
-  const [touched, setTouched] = useState<Record<keyof VehicleData, boolean>>({
+  const [touched, setTouched] = useState<
+    Record<keyof VehicleData, boolean>
+  >({
     plate: false,
     renavam: false,
     model: false,
-    color: false, // <--- NOVO
     city: false,
+    uf: false,
+    color: false,
   });
 
   function touch(field: keyof VehicleData) {
     setTouched((p) => ({ ...p, [field]: true }));
   }
 
-  const errors = useMemo(() => ({
-    plate:
-      touched.plate && data.plate.length !== 7
-        ? 'A placa informada não atende ao padrão válido.'
-        : undefined,
+  const errors = useMemo(
+    () => ({
+      plate:
+        touched.plate && data.plate.length !== 7
+          ? 'A placa informada não atende ao padrão válido.'
+          : undefined,
 
-    renavam:
-      touched.renavam &&
-      (onlyNumbers(data.renavam).length < 9 ||
-        onlyNumbers(data.renavam).length > 11)
-        ? 'O RENAVAM deve conter entre 9 e 11 dígitos numéricos.'
-        : undefined,
+      renavam:
+        touched.renavam &&
+        (onlyNumbers(data.renavam).length < 9 ||
+          onlyNumbers(data.renavam).length > 11)
+          ? 'O RENAVAM deve conter entre 9 e 11 dígitos numéricos.'
+          : undefined,
 
-    model:
-      touched.model && data.model.trim().length < 2
-        ? 'Informe o modelo do veículo.'
-        : undefined,
-        
-    // 3. Validação da cor
-    color:
-      touched.color && data.color.trim().length < 2
-        ? 'Informe a cor predominante.'
-        : undefined,
+      model:
+        touched.model && data.model.trim().length < 2
+          ? 'Informe o modelo do veículo.'
+          : undefined,
 
-    city:
-      touched.city && data.city.trim().length < 2
-        ? 'Informe o município de registro.'
-        : undefined,
-  }), [data, touched]);
+      city:
+        touched.city && data.city.trim().length < 2
+          ? 'Informe o município de registro.'
+          : undefined,
+
+      uf:
+        touched.uf && data.uf.trim().length !== 2
+          ? 'Informe a UF com duas letras (ex: SP).'
+          : undefined,
+
+      // color NÃO bloqueia fluxo
+      color:
+        touched.color && data.color && data.color.trim().length < 2
+          ? 'Cor muito curta.'
+          : undefined,
+    }),
+    [data, touched]
+  );
 
   return (
     <>
@@ -87,7 +97,7 @@ export default function VehicleForm({
         onChange={(v) =>
           onChange({ ...data, renavam: onlyNumbers(v) })
         }
-        helperText="Registro para consolidar histórico administrativo."
+        helperText="Registro para consolidação administrativa do veículo."
         errorText={errors.renavam}
         onBlur={() => touch('renavam')}
       />
@@ -103,18 +113,6 @@ export default function VehicleForm({
         onBlur={() => touch('model')}
       />
 
-      {/* 4. Novo Input de Cor */}
-      <Input
-        label="Cor do veículo"
-        value={data.color}
-        onChange={(v) =>
-          onChange({ ...data, color: v })
-        }
-        helperText="Cor predominante conforme consta no documento (CRLV)."
-        errorText={errors.color}
-        onBlur={() => touch('color')}
-      />
-
       <Input
         label="Município de registro"
         value={data.city}
@@ -125,6 +123,30 @@ export default function VehicleForm({
         helperText="Município onde o veículo está formalmente registrado."
         errorText={errors.city}
         onBlur={() => touch('city')}
+      />
+
+      <Input
+        label="UF de registro"
+        value={data.uf}
+        autoCapitalize="characters"
+        maxLength={2}
+        onChange={(v) =>
+          onChange({ ...data, uf: v.toUpperCase() })
+        }
+        helperText="Estado de registro do veículo (exigido para consulta oficial)."
+        errorText={errors.uf}
+        onBlur={() => touch('uf')}
+      />
+
+      <Input
+        label="Cor do veículo (opcional)"
+        value={data.color ?? ''}
+        onChange={(v) =>
+          onChange({ ...data, color: v })
+        }
+        helperText="Informação descritiva, conforme CRLV. Não utilizada na consulta."
+        errorText={errors.color}
+        onBlur={() => touch('color')}
       />
     </>
   );

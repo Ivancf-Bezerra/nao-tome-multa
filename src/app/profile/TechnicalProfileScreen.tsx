@@ -1,4 +1,4 @@
-import { 
+import {
   View,
   Text,
   ScrollView,
@@ -34,22 +34,29 @@ export default function TechnicalProfileScreen() {
   const [step, setStep] = useState<Step>('driver');
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
-  // ESTADO: CONDUTOR
+  /* =======================
+      ESTADO: CONDUTOR
+     ======================= */
+
   const [driver, setDriver] = useState<DriverData>({
-    fullName: 'João da Silva',
-    cpf: '123.456.789-09',
-    cnhNumber: '12345678900',
-    cnhCategory: 'B',
-    cnhExpiry: '31/12/2028',
+    fullName: '',
+    cpf: '',
+    cnhNumber: '',
+    cnhCategory: '',
+    cnhExpiry: '',
   });
 
-  // ESTADO: VEÍCULO (Atualizado com 'color')
+  /* =======================
+      ESTADO: VEÍCULO
+     ======================= */
+
   const [vehicle, setVehicle] = useState<VehicleData>({
-    plate: 'ABC1D23',
-    renavam: '12345678901',
-    model: 'Toyota Corolla',
-    color: 'Prata', // <--- CAMPO NOVO INICIALIZADO
-    city: 'São Paulo',
+    plate: '',
+    renavam: '',
+    model: '',
+    city: '',
+    uf: '',
+    color: '',
   });
 
   /* =======================
@@ -68,8 +75,8 @@ export default function TechnicalProfileScreen() {
     onlyNumbers(vehicle.renavam).length >= 9 &&
     onlyNumbers(vehicle.renavam).length <= 11 &&
     vehicle.model.trim().length >= 2 &&
-    vehicle.color.trim().length >= 2 && // <--- VALIDAÇÃO DA COR ADICIONADA
-    vehicle.city.trim().length >= 2;
+    vehicle.city.trim().length >= 2 &&
+    vehicle.uf.trim().length === 2; // CAMPO SOBERANO
 
   const canGoNext = isDriverValid;
   const canSave = isDriverValid && isVehicleValid;
@@ -100,6 +107,10 @@ export default function TechnicalProfileScreen() {
 
     handleSave();
   }
+
+  /* =======================
+      RENDER
+     ======================= */
 
   return (
     <View className="flex-1 bg-black/50">

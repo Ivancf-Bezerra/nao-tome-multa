@@ -15,13 +15,13 @@ export interface DriverProfile {
   cnhExpiry: string;
 }
 
-// ATUALIZAÇÃO AQUI: Adicionado campo 'color'
 export interface VehicleProfile {
   plate: string;
   renavam: string;
   model: string;
-  color: string; // <--- NOVO CAMPO OBRIGATÓRIO
+  color: string; // SEMPRE string
   city: string;
+  uf: string;
 }
 
 export interface TechnicalProfile {
@@ -42,7 +42,6 @@ const TechnicalProfileContext =
     undefined
   );
 
-// DICA: Mudei a chave para 'v2' para garantir que dados antigos (sem cor) não quebrem a aplicação
 const STORAGE_KEY = 'technical_profile_v2';
 
 export function TechnicalProfileProvider({
@@ -59,8 +58,21 @@ export function TechnicalProfileProvider({
       try {
         const stored =
           await SecureStore.getItemAsync(STORAGE_KEY);
+
         if (stored) {
-          setProfile(JSON.parse(stored));
+          const parsed = JSON.parse(stored);
+
+          // NORMALIZAÇÃO DEFENSIVA (APP REAL)
+          const normalized: TechnicalProfile = {
+            ...parsed,
+            vehicle: {
+              ...parsed.vehicle,
+              color: parsed.vehicle?.color ?? '',
+              uf: parsed.vehicle?.uf ?? '',
+            },
+          };
+
+          setProfile(normalized);
         }
       } catch {
         // falha silenciosa
@@ -68,6 +80,7 @@ export function TechnicalProfileProvider({
         setIsLoaded(true);
       }
     }
+
     loadProfile();
   }, []);
 

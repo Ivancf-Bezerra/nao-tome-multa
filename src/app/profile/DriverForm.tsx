@@ -11,6 +11,8 @@ export interface DriverData {
   cnhExpiry: string;
 }
 
+const VALID_CNH_CATEGORIES = ['A', 'B', 'C', 'D', 'E', 'AB', 'AC', 'AD', 'AE'];
+
 export default function DriverForm({
   data,
   onChange,
@@ -30,32 +32,42 @@ export default function DriverForm({
     setTouched((p) => ({ ...p, [field]: true }));
   }
 
-  const errors = useMemo(() => ({
-    fullName:
-      touched.fullName && data.fullName.trim().length < 5
-        ? 'O nome informado não corresponde a um nome completo válido.'
-        : undefined,
+  const errors = useMemo(() => {
+    const [day, month] = data.cnhExpiry.split('/').map(Number);
 
-    cpf:
-      touched.cpf && onlyNumbers(data.cpf).length !== 11
-        ? 'O CPF deve conter 11 dígitos numéricos válidos.'
-        : undefined,
+    return {
+      fullName:
+        touched.fullName && data.fullName.trim().length < 5
+          ? 'O nome informado não corresponde a um nome completo válido.'
+          : undefined,
 
-    cnhNumber:
-      touched.cnhNumber && data.cnhNumber.trim().length < 5
-        ? 'Número de CNH inválido ou incompleto.'
-        : undefined,
+      cpf:
+        touched.cpf && onlyNumbers(data.cpf).length !== 11
+          ? 'O CPF deve conter 11 dígitos numéricos válidos.'
+          : undefined,
 
-    cnhCategory:
-      touched.cnhCategory && data.cnhCategory.trim().length === 0
-        ? 'Informe uma categoria válida de habilitação.'
-        : undefined,
+      cnhNumber:
+        touched.cnhNumber && data.cnhNumber.trim().length < 5
+          ? 'Número de CNH inválido ou incompleto.'
+          : undefined,
 
-    cnhExpiry:
-      touched.cnhExpiry && data.cnhExpiry.length !== 10
-        ? 'A data informada não está no formato válido.'
-        : undefined,
-  }), [data, touched]);
+      cnhCategory:
+        touched.cnhCategory &&
+        !VALID_CNH_CATEGORIES.includes(data.cnhCategory)
+          ? 'Informe uma categoria válida de habilitação.'
+          : undefined,
+
+      cnhExpiry:
+        touched.cnhExpiry &&
+        (data.cnhExpiry.length !== 10 ||
+          !day ||
+          !month ||
+          day > 31 ||
+          month > 12)
+          ? 'A data informada não é válida.'
+          : undefined,
+    };
+  }, [data, touched]);
 
   return (
     <>
@@ -106,7 +118,7 @@ export default function DriverForm({
         onChange={(v) =>
           onChange({ ...data, cnhCategory: v.toUpperCase() })
         }
-        helperText="Categoria válida no momento do cadastro. Esta informação influencia a análise de determinadas infrações."
+        helperText="Categoria válida no momento do cadastro."
         errorText={errors.cnhCategory}
         onBlur={() => touch('cnhCategory')}
       />

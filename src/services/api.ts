@@ -1,27 +1,61 @@
-const ZAPAY_API_URL = 'https://api.usezapay.com.br/v1';
-const ZAPAY_SECRET = 'SUA_CHAVE_AQUI'; // No futuro, isso vai para um .env
+import Constants from 'expo-constants';
 
-export const fetchInfractions = async (plate: string, renavam: string) => {
+const ZAPAY_BASE_URL = 'https://api.zapay.com.br';
+
+const ZAPAY_TOKEN = Constants.expoConfig?.extra?.ZAPAY_API_KEY;
+
+type FetchParams = {
+  plate: string;
+  renavam: string;
+  uf: string;
+};
+
+export async function fetchInfractions(params: FetchParams) {
+  if (!ZAPAY_TOKEN) {
+    return {
+      ok: false,
+      status: 0,
+      data: null,
+      error: 'ZAPAY_TOKEN_MISSING',
+    };
+  }
+
   try {
-    const response = await fetch(`${ZAPAY_API_URL}/consultar-debitos`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ZAPAY_SECRET}`,
-      },
-      body: JSON.stringify({
-        placa: plate,
-        renavam: renavam,
-      }),
-    });
+    const response = await fetch(
+      `${ZAPAY_BASE_URL}/zapi/debts/?plate=${params.plate}&renavam=${params.renavam}&uf=${params.uf}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${ZAPAY_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    const data = await response.json();
 
     if (!response.ok) {
-      throw new Error('Falha técnica na consulta aos órgãos de trânsito.');
+      return {
+        ok: false,
+        status: response.status,
+        data: null,
+        error: 'ZAPAY_REQUEST_FAILED',
+        raw: data,
+      };
     }
 
-    return await response.json();
+    return {
+      ok: true,
+      status: response.status,
+      data,
+      error: null,
+    };
   } catch (error) {
-    // Postura contida: não expõe erros técnicos ao usuário
-    throw new Error('Sistema indisponível momentaneamente.');
+    return {
+      ok: false,
+      status: 0,
+      data: null,
+      error: 'ZAPAY_NETWORK_ERROR',
+    };
   }
-};
+}

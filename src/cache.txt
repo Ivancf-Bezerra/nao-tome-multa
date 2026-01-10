@@ -1,8 +1,8 @@
 ================================================================
 DOCUMENTO MESTRE — FONTE ÚNICA DE VERDADE (CONTRATO)
 PROJETO: NÃO TOME MULTA
-VERSÃO: MVP REAL v1.1 — USO EM PRODUÇÃO
-STATUS: ATIVO — CÓDIGO COM USO REAL
+VERSÃO: MVP REAL v1.4 — FLUXO TÉCNICO FUNCIONAL
+STATUS: ATIVO — BASE EVOLUTIVA CONTROLADA
 PADRÃO: INSTITUCIONAL / BANCÁRIO PREMIUM (SEM PROMESSA)
 ================================================================
 
@@ -17,35 +17,57 @@ decisão técnica que não esteja EXPLICITAMENTE alinhada
 a este documento é considerada INVÁLIDA.
 
 Este projeto é um MVP DE USO REAL.
-Não é protótipo, não é conceito, não é experimento visual.
+Não é protótipo. Não é conceito. Não é experimento visual.
 
 ================================================================
-1. DEFINIÇÃO FORMAL DO MVP REAL v1.1
+1. DEFINIÇÃO FORMAL DO MVP REAL
 ================================================================
 
-O MVP REAL v1.1 é definido como:
+O MVP REAL do NÃO TOME MULTA é definido como:
 
 - Aplicativo funcional
 - Usável por usuários reais
-- Com fluxo completo e coerente
+- Fluxo coerente e fechado
+- Integrações reais controladas
 - Sem funcionalidades fictícias
-- Sem estados “mockados” sem propósito
 - Sem telas decorativas
-- Sem código especulativo
+- Sem promessas implícitas ou explícitas
 
 REGRA FUNDAMENTAL:
 
 Todo código implementado DEVE:
 - Ser necessário para o funcionamento real do produto
 - Ter impacto direto na experiência do usuário
-- Resolver um problema descrito neste documento
+- Resolver um problema explicitamente descrito neste documento
 
 Código “para depois”, “para escalar”, “para o futuro” é PROIBIDO.
 
 ================================================================
-2. CONTEXTO OPERACIONAL GERAL
+2. CONTEXTO OPERACIONAL DO PRODUTO
 ================================================================
-[SEM ALTERAÇÕES]
+
+Aplicativo mobile desenvolvido em:
+
+- React Native
+- Expo (Managed Workflow)
+- TypeScript (obrigatório)
+- Expo Router (estrutura obrigatória em src/app)
+- NativeWind (dark mode obrigatório)
+- Clerk (@clerk/clerk-expo)
+
+Objetivo do produto:
+
+- Organizar dados técnicos relacionados a autuações de trânsito
+- Preparar e orientar consultas oficiais de multas
+- Comparar dados cadastrais com dados retornados por órgãos oficiais
+- Reduzir ansiedade por clareza técnica e previsibilidade
+
+O aplicativo NÃO:
+- Presta advocacia
+- Substitui profissionais do direito
+- Garante inexistência de multas
+- Garante êxito administrativo ou judicial
+- Realiza monitoramento automático
 
 ================================================================
 3. PRINCÍPIO SOBERANO DO PRODUTO
@@ -53,169 +75,284 @@ Código “para depois”, “para escalar”, “para o futuro” é PROIBIDO.
 
 O NÃO TOME MULTA deve:
 
-- Centralizar o controle operacional do usuário
-  em um único ponto previsível (Home)
-- Reduzir ansiedade por clareza de estado
+- Parecer mais organizado e previsível que sistemas públicos
+- Reduzir ansiedade por informação, não por promessa
 - Operar com postura institucional e regulatória
-- Manter linguagem formal casual, objetiva e contida
+- Manter linguagem formal, clara, didática e contida
 
-A Home passa a ser o **fluxo central soberano** do MVP.
+Didático significa:
+- Explicar o PORQUÊ dos dados solicitados
+- Não infantilizar o usuário
+- Não prometer resultado
+- Não dramatizar consequências
 
 ================================================================
 4. STACK TECNOLÓGICA AUTORIZADA (FECHADA)
 ================================================================
-[SEM ALTERAÇÕES]
+
+CORE:
+- React Native
+- Expo SDK (Managed)
+- TypeScript
+
+ROTEAMENTO:
+- Expo Router (src/app)
+
+ESTILIZAÇÃO:
+- NativeWind
+- Dark Mode obrigatório
+
+UI:
+- react-native-safe-area-context
+- expo-linear-gradient
+- @expo/vector-icons (Ionicons)
+
+AUTENTICAÇÃO:
+- Clerk (email code + Google OAuth)
+
+PERSISTÊNCIA LOCAL:
+- expo-secure-store
+
+INTEGRAÇÃO EXTERNA AUTORIZADA (MVP):
+- Zapay API
+- Endpoint: /zapi/debts/
+- Uso pontual, sob ação explícita do usuário
+
+PROIBIDO:
+- Autenticação própria
+- Login por telefone
+- Scraping
+- Monitoramento automático
+- Backend obrigatório no MVP atual
 
 ================================================================
-5. ARQUITETURA DE FLUXO (ATUALIZADA)
+5. ARQUITETURA DE FLUXO (IMUTÁVEL)
 ================================================================
 
 Fluxo macro obrigatório:
 
 1. app/index.tsx
-   - Entrada institucional (visual)
-   - Nenhuma lógica de decisão
-
-2. app/_layout.tsx
-   - AuthGate soberano
-   - Decide acesso exclusivamente via Clerk
-
+2. app/_layout.tsx (AuthGate via Clerk)
 3. auth/login.tsx
-   - Login por email ou Google
-   - Sem navegação manual
+4. App autenticado (Home)
 
-4. Home (painel + fluxo inicial)
-   - Ponto central do produto
-   - Onde a análise ocorre
-   - Onde decisões iniciais são tomadas
-   - Onde o usuário compreende todo o estado do sistema
-
-5. Defesas (continuação especializada)
-   - Fluxo complementar
-   - Acessado apenas após geração explícita na Home
-
-REGRAS ABSOLUTAS:
-- A Home é soberana no fluxo inicial
-- Defesas NÃO inicia lógica própria
-- router.replace em transições finais
-- Nenhuma tela duplica decisões já tomadas
+REGRAS:
+- Nenhuma tela decide autenticação
+- Nenhuma UI chama API diretamente
+- Toda integração externa passa por Service Pattern
+- Contextos são fontes de verdade, nunca renderizam UI
 
 ================================================================
-6. PADRÃO VISUAL GLOBAL
-================================================================
-[SEM ALTERAÇÕES]
-
-================================================================
-7. PALETA DE CORES OFICIAL
-================================================================
-[SEM ALTERAÇÕES]
-
-================================================================
-8. HOME — PAPEL OPERACIONAL (REDEFINIDO)
+6. HOME — ESTADO OPERACIONAL CENTRAL
 ================================================================
 
-A Home é o CENTRO OPERACIONAL DO PRODUTO.
+A Home é um ORQUESTRADOR DE ESTADOS.
 
-Funções da Home:
-- Receber o usuário autenticado
-- Iniciar e acompanhar a análise
-- Exibir estados claros e determinísticos
-- Controlar o fluxo de geração de defesa
-- Preparar o usuário para a etapa administrativa
+Ela:
+- Reage ao estado do cadastro técnico
+- Exibe cards operacionais contextuais
+- Não contém lógica de negócio
+- Não mantém estado fictício
 
-A Home:
-- Pode manter estado de fluxo local
-- Pode gerar rascunho de defesa
-- Pode permitir edição do texto gerado
-- Decide quando o usuário segue para Defesas
-
-PROIBIDO NA HOME:
-- Envio automático
-- Integração externa
-- Promessa de resultado
-- Qualquer automação irreversível
+Implementado:
+- Header institucional
+- Mensagem de boas-vindas
+- Card de cadastro técnico (ausente)
+- Preview do cadastro técnico (presente)
+- Card de pesquisa de multas
+- Modal de notificações
+- Confirmação de exclusão de cadastro (bottom sheet)
+- Feedback pós-exclusão (snackbar discreto)
 
 ================================================================
-9. COMPONENTES DA HOME (MVP REAL v1.1)
+7. CADASTRO TÉCNICO — PRÉ-REQUISITO SOBERANO
 ================================================================
 
-Componentes ativos:
+O Cadastro Técnico é OBRIGATÓRIO.
 
-- UploadCard (CTA primário)
-- AnalysisResultCard
-- RequiredDocumentsCard
-- DefenseCard
-- NotificationsModal
+Sem ele:
+- Não há pesquisa de multas
+- Não há análise
+- Não há comparação
+
+Formato:
+- Modal Bottom Sheet
+- Conteúdo rolável
+- CTA único de salvamento
+- Fluxo em dois passos (Condutor → Veículo)
+
+================================================================
+8. DADOS DO CADASTRO TÉCNICO (ATUAL)
+================================================================
+
+CONDUTOR:
+- Nome completo
+- CPF
+- Número da CNH
+- Categoria da CNH
+- Validade da CNH
+
+VEÍCULO:
+- Placa
+- RENAVAM
+- Modelo
+- Cor (informativa, não soberana)
+- Município de registro
+- UF (OBRIGATÓRIO para consulta oficial)
 
 Regras:
-- Apenas UM CTA primário por estado
-- Fluxo sempre visível e compreensível
-- Estado explícito, nunca implícito
+- Dados opcionais para o usuário NÃO são opcionais no tipo
+- Campos podem ser string vazia, nunca undefined
+- Validação mínima ocorre antes de salvar
 
 ================================================================
-10. UPLOADCARD — PADRÃO CONGELADO
-================================================================
-[SEM ALTERAÇÕES]
-
-================================================================
-11. MODELO DE DADOS — ANÁLISE (LOCAL v1)
-================================================================
-[SEM ALTERAÇÕES]
-
-================================================================
-12. GERAÇÃO DE DEFESA — MVP REAL
+9. PERSISTÊNCIA E FONTE DE VERDADE
 ================================================================
 
-A geração de defesa no MVP v1.1 é:
-
-- Local
-- Determinística
-- Baseada exclusivamente nos dados analisados
-- Sem uso de IA externa
-- Sem linguagem promocional
-
-O texto gerado é:
-- Um rascunho institucional
-- Editável pelo usuário
-- Sem envio automático
+- Persistência local via expo-secure-store
+- Gerenciamento via TechnicalProfileContext
+- Fonte única de verdade: Contexto
+- Normalização defensiva de dados persistidos
+- Tolerância a versões antigas de dados
 
 ================================================================
-13. DEFESAS ADMINISTRATIVAS — PAPEL ATUALIZADO
+10. SERVICE PATTERN — INTEGRAÇÃO ZAPAY
 ================================================================
 
-Tela: defesas.tsx
+Toda integração externa segue o padrão:
 
-Função:
-- Continuação do fluxo iniciado na Home
-- Revisão final do texto
-- Exibição de instruções administrativas
+UI → Hook → Service → api.ts → Gateway externo
 
-A tela Defesas:
-- NÃO gera defesa
-- NÃO decide elegibilidade
-- NÃO inicia fluxo
+Camadas implementadas:
+
+- api.ts:
+  - HTTP cru
+  - Autenticação Zapay
+  - Sem lógica de negócio
+
+- InfractionService:
+  - Tradução Zapay → domínio interno
+  - Cálculo de totais
+  - Encapsulamento de erro
+
+- RequestState:
+  - idle | loading | success | error
+
+- useInfractionSearch:
+  - Orquestração de estado
+  - Nenhuma UI
+  - Nenhuma regra de apresentação
 
 ================================================================
-14. PADRÃO DE COMPONENTIZAÇÃO
+11. PESQUISA DE MULTAS — ESCOPO DO MVP
 ================================================================
-[SEM ALTERAÇÕES]
+
+A Pesquisa de Multas no MVP:
+
+- É acionada explicitamente pelo usuário
+- Utiliza Zapay como gateway
+- Exige placa + renavam + UF válidos
+- Não é automática
+- Não é contínua
+- Não garante resultado
+
+Estados visíveis:
+- Idle
+- Buscando infrações
+- Consulta concluída (com ou sem registros)
+- Erro técnico controlado
+
+Implementado:
+- Card de disparo da consulta
+- Bloqueio por dados incoerentes
+- Aviso institucional quando dados estão incompletos
+- Proteção contra chamadas inválidas
 
 ================================================================
-15. REGRAS ABSOLUTAS DE CÓDIGO
+12. PADRÃO VISUAL GLOBAL
 ================================================================
-[SEM ALTERAÇÕES]
+
+PADRÃO: INSTITUCIONAL / BANCÁRIO
+
+Características:
+- Visual sóbrio
+- Tipografia hierárquica
+- Destaques apenas em ações (Amber)
+- Nada promocional
+- Nada empolgado
+- Feedbacks discretos e funcionais
 
 ================================================================
-16. REGRA FINAL (CONTRATO)
+13. REGRAS DE INTERAÇÃO CRÍTICA
+================================================================
+
+Ações destrutivas:
+- Devem ser explícitas
+- Devem exigir confirmação
+- Devem fornecer feedback pós-ação
+
+Implementado:
+- Exclusão de cadastro técnico
+- Confirmação via bottom sheet
+- Feedback pós-exclusão (snackbar)
+
+================================================================
+14. ESTADO ATUAL DO MVP (REAL)
+================================================================
+
+IMPLEMENTADO E FUNCIONAL:
+- Autenticação (Clerk)
+- Home operacional
+- Cadastro técnico completo
+- Persistência local robusta
+- Integração Zapay funcional
+- Consulta manual de infrações
+- Exclusão segura de cadastro
+- Feedback institucional
+
+NÃO IMPLEMENTADO (POR DECISÃO):
+- Monitoramento contínuo
+- Backend próprio
+- Promessas de resultado
+- Defesa automática
+- Acompanhamento jurídico
+
+================================================================
+15. PRÓXIMOS PASSOS TÉCNICOS (AUTORIZADOS)
+================================================================
+
+ORDEM CONTROLADA:
+
+1. Extrato Técnico da Consulta:
+   - Tela ou modal dedicado
+   - Lista de infrações
+   - Datas, valores e status
+   - Sem interpretação jurídica
+
+2. Destaque Financeiro:
+   - Total acumulado
+   - Severidade visual discreta
+   - Nenhuma recomendação
+
+3. UX de Erro Avançada:
+   - Diferenciar erro técnico vs. ausência de registros
+   - Copy institucional
+
+4. (Opcional)
+   - Undo temporário de exclusão
+   - Log local de ações críticas
+
+================================================================
+REGRA FINAL (CONTRATO)
 ================================================================
 
 Este documento é um CONTRATO.
 
 - Não interpretar
 - Não flexibilizar
-- Não assumir requisitos implícitos
-- Não “melhorar” sem autorização
-- Não antecipar futuro
+- Não antecipar
+- Não prometer
+- Não integrar fora do escopo
 
 Se não está aqui, NÃO EXISTE.
 
