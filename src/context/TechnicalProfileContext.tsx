@@ -7,21 +7,28 @@ import {
 } from 'react';
 import * as SecureStore from 'expo-secure-store';
 
+/* =======================
+   TIPOS DE DOMÍNIO
+======================= */
+
 export interface DriverProfile {
   fullName: string;
   cpf: string;
   cnhNumber: string;
   cnhCategory: string;
   cnhExpiry: string;
+  cnhIssuerUF: string;
 }
 
 export interface VehicleProfile {
   plate: string;
   renavam: string;
+  brand: string;
   model: string;
-  color: string; // SEMPRE string
+  color: string;
   city: string;
   uf: string;
+  ownerCpf: string;
 }
 
 export interface TechnicalProfile {
@@ -29,6 +36,10 @@ export interface TechnicalProfile {
   vehicle: VehicleProfile;
   createdAt: string;
 }
+
+/* =======================
+   CONTEXTO
+======================= */
 
 interface TechnicalProfileContextData {
   profile: TechnicalProfile | null;
@@ -39,10 +50,14 @@ interface TechnicalProfileContextData {
 
 const TechnicalProfileContext =
   createContext<TechnicalProfileContextData | undefined>(
-    undefined
+    undefined,
   );
 
-const STORAGE_KEY = 'technical_profile_v2';
+const STORAGE_KEY = 'technical_profile_v3';
+
+/* =======================
+   PROVIDER
+======================= */
 
 export function TechnicalProfileProvider({
   children,
@@ -59,23 +74,50 @@ export function TechnicalProfileProvider({
         const stored =
           await SecureStore.getItemAsync(STORAGE_KEY);
 
-        if (stored) {
-          const parsed = JSON.parse(stored);
+        if (!stored) return;
 
-          // NORMALIZAÇÃO DEFENSIVA (APP REAL)
-          const normalized: TechnicalProfile = {
-            ...parsed,
-            vehicle: {
-              ...parsed.vehicle,
-              color: parsed.vehicle?.color ?? '',
-              uf: parsed.vehicle?.uf ?? '',
-            },
-          };
+        const parsed = JSON.parse(stored);
 
-          setProfile(normalized);
-        }
+        /**
+         * NORMALIZAÇÃO DEFENSIVA
+         * - suporta versões antigas
+         * - garante strings
+         * - nunca undefined
+         */
+        const normalized: TechnicalProfile = {
+          createdAt:
+            parsed.createdAt ??
+            new Date().toISOString(),
+
+          driver: {
+            fullName: parsed.driver?.fullName ?? '',
+            cpf: parsed.driver?.cpf ?? '',
+            cnhNumber: parsed.driver?.cnhNumber ?? '',
+            cnhCategory:
+              parsed.driver?.cnhCategory ?? '',
+            cnhExpiry:
+              parsed.driver?.cnhExpiry ?? '',
+            cnhIssuerUF:
+              parsed.driver?.cnhIssuerUF ?? '',
+          },
+
+          vehicle: {
+            plate: parsed.vehicle?.plate ?? '',
+            renavam:
+              parsed.vehicle?.renavam ?? '',
+            brand: parsed.vehicle?.brand ?? '',
+            model: parsed.vehicle?.model ?? '',
+            color: parsed.vehicle?.color ?? '',
+            city: parsed.vehicle?.city ?? '',
+            uf: parsed.vehicle?.uf ?? '',
+            ownerCpf:
+              parsed.vehicle?.ownerCpf ?? '',
+          },
+        };
+
+        setProfile(normalized);
       } catch {
-        // falha silenciosa
+        // falha silenciosa: app real não quebra por storage
       } finally {
         setIsLoaded(true);
       }
@@ -88,7 +130,7 @@ export function TechnicalProfileProvider({
     setProfile(data);
     await SecureStore.setItemAsync(
       STORAGE_KEY,
-      JSON.stringify(data)
+      JSON.stringify(data),
     );
   }
 
@@ -111,12 +153,20 @@ export function TechnicalProfileProvider({
   );
 }
 
+/* =======================
+   HOOK
+======================= */
+
 export function useTechnicalProfile(): TechnicalProfileContextData {
-  const context = useContext(TechnicalProfileContext);
+  const context = useContext(
+    TechnicalProfileContext,
+  );
+
   if (!context) {
     throw new Error(
-      'useTechnicalProfile must be used within a TechnicalProfileProvider'
+      'useTechnicalProfile must be used within a TechnicalProfileProvider',
     );
   }
+
   return context;
 }

@@ -1,153 +1,126 @@
-import { Text } from 'react-native';
-import { useMemo, useState } from 'react';
-import Input from './Input';
-import { formatPlate, onlyNumbers } from './masks';
+import { View } from 'react-native';
+import { useState } from 'react';
 
-export interface VehicleData {
+import Input from './Input';
+import VehicleFipeSelector, {
+  VehicleFipeData,
+} from './VehicleFipeSelector';
+
+import { formatCPF, formatPlate, onlyNumbers } from './masks';
+
+/* =======================
+   TIPOS
+======================= */
+
+export interface VehicleData extends VehicleFipeData {
   plate: string;
   renavam: string;
-  model: string;
   city: string;
-  uf: string;        // OBRIGATÓRIO
-  color: string;   // INFORMATIVO (não técnico)
+  uf: string;
+  color: string;
+  ownerCpf: string;
 }
 
+/**
+ * ⚠️ MOCK APENAS PARA TESTES DE DESENVOLVIMENTO
+ */
+const MOCK_VEHICLE: VehicleData = {
+  plate: 'ABC1D23',
+  renavam: '12345678910',
+  brand: 'HONDA',
+  model: 'CIVIC',
+  city: 'SÃO PAULO',
+  uf: 'SP',
+  color: 'PRATA',
+  ownerCpf: '',
+};
+
+/* =======================
+   COMPONENTE
+======================= */
+
 export default function VehicleForm({
-  data,
+  data = MOCK_VEHICLE,
   onChange,
 }: {
-  data: VehicleData;
-  onChange: (data: VehicleData) => void;
+  data?: VehicleData;
+  onChange: (v: VehicleData) => void;
 }) {
-  const [touched, setTouched] = useState<
-    Record<keyof VehicleData, boolean>
-  >({
-    plate: false,
-    renavam: false,
-    model: false,
-    city: false,
-    uf: false,
-    color: false,
-  });
+  const [vehicle, setVehicle] = useState<VehicleData>(data);
 
-  function touch(field: keyof VehicleData) {
-    setTouched((p) => ({ ...p, [field]: true }));
+  function update(partial: Partial<VehicleData>) {
+    const next = { ...vehicle, ...partial };
+    setVehicle(next);
+    onChange(next);
   }
 
-  const errors = useMemo(
-    () => ({
-      plate:
-        touched.plate && data.plate.length !== 7
-          ? 'A placa informada não atende ao padrão válido.'
-          : undefined,
-
-      renavam:
-        touched.renavam &&
-        (onlyNumbers(data.renavam).length < 9 ||
-          onlyNumbers(data.renavam).length > 11)
-          ? 'O RENAVAM deve conter entre 9 e 11 dígitos numéricos.'
-          : undefined,
-
-      model:
-        touched.model && data.model.trim().length < 2
-          ? 'Informe o modelo do veículo.'
-          : undefined,
-
-      city:
-        touched.city && data.city.trim().length < 2
-          ? 'Informe o município de registro.'
-          : undefined,
-
-      uf:
-        touched.uf && data.uf.trim().length !== 2
-          ? 'Informe a UF com duas letras (ex: SP).'
-          : undefined,
-
-      // color NÃO bloqueia fluxo
-      color:
-        touched.color && data.color && data.color.trim().length < 2
-          ? 'Cor muito curta.'
-          : undefined,
-    }),
-    [data, touched]
-  );
-
   return (
-    <>
-      <Text className="mt-6 text-sm font-medium text-white">
-        Dados do veículo
-      </Text>
+    <View className="mt-6 gap-6">
+      {/* IDENTIFICAÇÃO DO VEÍCULO (FIPE) */}
+      <VehicleFipeSelector
+        value={{
+          brand: vehicle.brand,
+          model: vehicle.model,
+        }}
+        onChange={(v) => update(v)}
+      />
 
+      {/* PLACA */}
       <Input
         label="Placa do veículo"
-        value={data.plate}
+        value={vehicle.plate}
         autoCapitalize="characters"
+        maxLength={7}
         onChange={(v) =>
-          onChange({ ...data, plate: formatPlate(v) })
+          update({ plate: formatPlate(v) })
         }
-        helperText="Identificação principal do veículo nos sistemas oficiais."
-        errorText={errors.plate}
-        onBlur={() => touch('plate')}
       />
 
+      {/* RENAVAM */}
       <Input
         label="Número do RENAVAM"
-        value={data.renavam}
+        value={vehicle.renavam}
         keyboardType="numeric"
+        maxLength={11}
         onChange={(v) =>
-          onChange({ ...data, renavam: onlyNumbers(v) })
+          update({ renavam: onlyNumbers(v) })
         }
-        helperText="Registro para consolidação administrativa do veículo."
-        errorText={errors.renavam}
-        onBlur={() => touch('renavam')}
       />
 
-      <Input
-        label="Modelo do veículo"
-        value={data.model}
-        onChange={(v) =>
-          onChange({ ...data, model: v })
-        }
-        helperText="Modelo conforme cadastro no órgão de trânsito."
-        errorText={errors.model}
-        onBlur={() => touch('model')}
-      />
-
+      {/* MUNICÍPIO */}
       <Input
         label="Município de registro"
-        value={data.city}
-        autoCapitalize="words"
-        onChange={(v) =>
-          onChange({ ...data, city: v })
-        }
-        helperText="Município onde o veículo está formalmente registrado."
-        errorText={errors.city}
-        onBlur={() => touch('city')}
+        value={vehicle.city}
+        onChange={(v) => update({ city: v })}
       />
 
+      {/* UF */}
       <Input
         label="UF de registro"
-        value={data.uf}
+        value={vehicle.uf}
         autoCapitalize="characters"
         maxLength={2}
         onChange={(v) =>
-          onChange({ ...data, uf: v.toUpperCase() })
+          update({ uf: v.toUpperCase() })
         }
-        helperText="Estado de registro do veículo (exigido para consulta oficial)."
-        errorText={errors.uf}
-        onBlur={() => touch('uf')}
       />
 
+      {/* COR */}
       <Input
-        label="Cor do veículo (opcional)"
-        value={data.color ?? ''}
-        onChange={(v) =>
-          onChange({ ...data, color: v })
-        }
-        helperText="Informação descritiva, conforme CRLV. Não utilizada na consulta."
-        errorText={errors.color}
-        onBlur={() => touch('color')}
+        label="Cor do veículo"
+        value={vehicle.color}
+        onChange={(v) => update({ color: v })}
       />
-    </>
+
+      {/* PROPRIETÁRIO */}
+      <Input
+        label="CPF do proprietário (opcional)"
+        value={vehicle.ownerCpf}
+        keyboardType="numeric"
+        onChange={(v) =>
+          update({ ownerCpf: formatCPF(v) })
+        }
+      />
+    </View>
   );
 }

@@ -4,14 +4,13 @@ import {
   ScrollView,
   Pressable,
   Dimensions,
-  Animated,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 
 import {
   useTechnicalProfile,
@@ -27,40 +26,42 @@ const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.9;
 
 type Step = 'driver' | 'vehicle';
 
+/**
+ * ⚠️ MOCK APENAS PARA TESTES DE DESENVOLVIMENTO
+ * Não representa preenchimento automático.
+ */
+const MOCK_DRIVER: DriverData = {
+  fullName: 'JOÃO CARLOS DA SILVA',
+  cpf: '123.456.789-09',
+  cnhNumber: '98765432100',
+  cnhCategory: 'B',
+  cnhExpiry: '15/08/2027',
+  cnhIssuerUF: 'SP',
+};
+
+const MOCK_VEHICLE: VehicleData = {
+  plate: 'ABC1D23',
+  renavam: '12345678910',
+
+  brand: 'HONDA',
+  model: 'CIVIC',
+  city: 'SÃO PAULO',
+  uf: 'SP',
+  color: 'PRATA',
+  ownerCpf: '',
+};
+
 export default function TechnicalProfileScreen() {
   const router = useRouter();
   const { saveProfile } = useTechnicalProfile();
 
   const [step, setStep] = useState<Step>('driver');
-  const fadeAnim = useRef(new Animated.Value(1)).current;
+
+  const [driver, setDriver] = useState<DriverData>(MOCK_DRIVER);
+  const [vehicle, setVehicle] = useState<VehicleData>(MOCK_VEHICLE);
 
   /* =======================
-      ESTADO: CONDUTOR
-     ======================= */
-
-  const [driver, setDriver] = useState<DriverData>({
-    fullName: '',
-    cpf: '',
-    cnhNumber: '',
-    cnhCategory: '',
-    cnhExpiry: '',
-  });
-
-  /* =======================
-      ESTADO: VEÍCULO
-     ======================= */
-
-  const [vehicle, setVehicle] = useState<VehicleData>({
-    plate: '',
-    renavam: '',
-    model: '',
-    city: '',
-    uf: '',
-    color: '',
-  });
-
-  /* =======================
-      VALIDAÇÃO GLOBAL
+     VALIDAÇÃO MÍNIMA
      ======================= */
 
   const isDriverValid =
@@ -68,21 +69,23 @@ export default function TechnicalProfileScreen() {
     onlyNumbers(driver.cpf).length === 11 &&
     driver.cnhNumber.trim().length >= 5 &&
     driver.cnhCategory.trim().length > 0 &&
-    driver.cnhExpiry.length === 10;
+    driver.cnhExpiry.length === 10 &&
+    driver.cnhIssuerUF.length === 2;
 
   const isVehicleValid =
     vehicle.plate.length === 7 &&
     onlyNumbers(vehicle.renavam).length >= 9 &&
     onlyNumbers(vehicle.renavam).length <= 11 &&
+    vehicle.brand.trim().length >= 2 &&
     vehicle.model.trim().length >= 2 &&
     vehicle.city.trim().length >= 2 &&
-    vehicle.uf.trim().length === 2; // CAMPO SOBERANO
+    vehicle.uf.trim().length === 2;
 
   const canGoNext = isDriverValid;
   const canSave = isDriverValid && isVehicleValid;
 
   /* =======================
-      AÇÕES
+     AÇÕES
      ======================= */
 
   async function handleSave() {
@@ -109,7 +112,7 @@ export default function TechnicalProfileScreen() {
   }
 
   /* =======================
-      RENDER
+     RENDER
      ======================= */
 
   return (
@@ -142,26 +145,24 @@ export default function TechnicalProfileScreen() {
             </View>
 
             <Text className="mt-1 text-sm text-slate-500">
-              Informe os dados necessários para viabilizar análises e comparações técnicas.
+              Informe os dados conforme constam nos documentos oficiais.
             </Text>
           </View>
 
           {/* CONTEÚDO */}
-          <Animated.View style={{ opacity: fadeAnim }} className="flex-1">
-            <ScrollView
-              className="px-6"
-              contentContainerStyle={{ paddingBottom: 24 }}
-              showsVerticalScrollIndicator={false}
-            >
-              {step === 'driver' && (
-                <DriverForm data={driver} onChange={setDriver} />
-              )}
+          <ScrollView
+            className="px-6"
+            contentContainerStyle={{ paddingBottom: 24 }}
+            showsVerticalScrollIndicator={false}
+          >
+            {step === 'driver' && (
+              <DriverForm data={driver} onChange={setDriver} />
+            )}
 
-              {step === 'vehicle' && (
-                <VehicleForm data={vehicle} onChange={setVehicle} />
-              )}
-            </ScrollView>
-          </Animated.View>
+            {step === 'vehicle' && (
+              <VehicleForm data={vehicle} onChange={setVehicle} />
+            )}
+          </ScrollView>
 
           {/* FOOTER */}
           <View className="border-t border-slate-800 px-6 py-4">

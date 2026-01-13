@@ -1,39 +1,56 @@
 import { useState } from 'react';
-import { InfractionService } from './InfractionService';
-import { InspectionResult } from './types';
-import { RequestState } from './requestState';
+import { Infraction } from './types';
 
-type VehicleQuery = {
-  plate: string;
-  renavam: string;
-  uf: string;
-};
+export type RequestStatus =
+  | 'idle'
+  | 'loading'
+  | 'success'
+  | 'error';
 
-const initialState: RequestState<InspectionResult> = {
-  status: 'idle',
-  data: null,
-  error: null,
-};
+interface InfractionSearchState {
+  status: RequestStatus;
+  data?: {
+    infraction: Infraction;
+  };
+  error?: string;
+}
 
 export function useInfractionSearch() {
   const [state, setState] =
-    useState<RequestState<InspectionResult>>(initialState);
-
-  async function search(vehicle: VehicleQuery) {
-    setState({
-      status: 'loading',
-      data: null,
-      error: null,
+    useState<InfractionSearchState>({
+      status: 'idle',
     });
 
-    const result =
-      await InfractionService.fetchByVehicle(vehicle);
+  function startManualAnalysis(
+    infraction: Infraction,
+  ) {
+    console.log(
+      '🟡 useInfractionSearch.startManualAnalysis',
+    );
+    console.log(
+      JSON.stringify(infraction, null, 2),
+    );
 
-    setState(result);
+    try {
+      setState({ status: 'loading' });
+
+      setState({
+        status: 'success',
+        data: {
+          infraction,
+        },
+      });
+    } catch {
+      setState({
+        status: 'error',
+        error:
+          'Falha técnica ao iniciar análise.',
+      });
+    }
   }
 
   return {
     state,
-    search,
+    startManualAnalysis,
   };
 }

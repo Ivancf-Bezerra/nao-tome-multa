@@ -18,7 +18,7 @@ export default function TechnicalProfilePreviewCard({
   if (!profile) return null;
 
   return (
-    <CardContainer>
+    <CardContainer >
       {/* HEADER */}
       <View className="flex-row items-center justify-between mb-4 border-b border-slate-800/50 pb-3">
         <View className="flex-row items-center gap-2">

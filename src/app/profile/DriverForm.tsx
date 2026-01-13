@@ -1,4 +1,4 @@
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 import { useMemo, useState } from 'react';
 import Input from './Input';
 import { formatCPF, formatDate, onlyNumbers } from './masks';
@@ -9,15 +9,41 @@ export interface DriverData {
   cnhNumber: string;
   cnhCategory: string;
   cnhExpiry: string;
+  cnhIssuerUF: string;
 }
 
-const VALID_CNH_CATEGORIES = ['A', 'B', 'C', 'D', 'E', 'AB', 'AC', 'AD', 'AE'];
+const VALID_CNH_CATEGORIES = [
+  'A',
+  'B',
+  'C',
+  'D',
+  'E',
+  'AB',
+  'AC',
+  'AD',
+  'AE',
+] as const;
+
+type CnhCategory = typeof VALID_CNH_CATEGORIES[number];
+
+/**
+ * ⚠️ MOCK APENAS PARA TESTES DE DESENVOLVIMENTO
+ * Remover ou zerar em produção final.
+ */
+const MOCK_DRIVER_DATA: DriverData = {
+  fullName: 'JOÃO CARLOS DA SILVA',
+  cpf: '123.456.789-09',
+  cnhNumber: '98765432100',
+  cnhCategory: 'B',
+  cnhExpiry: '15/08/2027',
+  cnhIssuerUF: 'SP',
+};
 
 export default function DriverForm({
-  data,
+  data = MOCK_DRIVER_DATA,
   onChange,
 }: {
-  data: DriverData;
+  data?: DriverData;
   onChange: (data: DriverData) => void;
 }) {
   const [touched, setTouched] = useState<Record<keyof DriverData, boolean>>({
@@ -26,10 +52,11 @@ export default function DriverForm({
     cnhNumber: false,
     cnhCategory: false,
     cnhExpiry: false,
+    cnhIssuerUF: false,
   });
 
   function touch(field: keyof DriverData) {
-    setTouched((p) => ({ ...p, [field]: true }));
+    setTouched((prev) => ({ ...prev, [field]: true }));
   }
 
   const errors = useMemo(() => {
@@ -38,12 +65,12 @@ export default function DriverForm({
     return {
       fullName:
         touched.fullName && data.fullName.trim().length < 5
-          ? 'O nome informado não corresponde a um nome completo válido.'
+          ? 'Informe o nome completo conforme consta na habilitação.'
           : undefined,
 
       cpf:
         touched.cpf && onlyNumbers(data.cpf).length !== 11
-          ? 'O CPF deve conter 11 dígitos numéricos válidos.'
+          ? 'O CPF deve conter 11 dígitos numéricos.'
           : undefined,
 
       cnhNumber:
@@ -53,8 +80,8 @@ export default function DriverForm({
 
       cnhCategory:
         touched.cnhCategory &&
-        !VALID_CNH_CATEGORIES.includes(data.cnhCategory)
-          ? 'Informe uma categoria válida de habilitação.'
+        !VALID_CNH_CATEGORIES.includes(data.cnhCategory as CnhCategory)
+          ? 'Selecione uma categoria válida.'
           : undefined,
 
       cnhExpiry:
@@ -64,77 +91,139 @@ export default function DriverForm({
           !month ||
           day > 31 ||
           month > 12)
-          ? 'A data informada não é válida.'
+          ? 'Data de validade inválida.'
+          : undefined,
+
+      cnhIssuerUF:
+        touched.cnhIssuerUF && data.cnhIssuerUF.length !== 2
+          ? 'Informe a UF do órgão emissor.'
           : undefined,
     };
   }, [data, touched]);
 
   return (
-    <>
-      <Text className="mt-6 text-sm font-medium text-white">
-        Dados do condutor
-      </Text>
+    <View className="mt-6 gap-4">
+      {/* Header institucional */}
+      <View className="gap-1">
+        <Text className="text-base font-semibold text-white">
+          Dados do condutor
+        </Text>
+        <Text className="text-xs text-neutral-400">
+          Informações utilizadas para identificação administrativa do condutor.
+        </Text>
+      </View>
 
       <Input
         label="Nome completo do condutor"
+        placeholder="Ex: João Carlos da Silva"
         value={data.fullName}
         autoCapitalize="words"
         onChange={(v) =>
           onChange({ ...data, fullName: v })
         }
-        helperText="Utilize o nome exatamente como consta na habilitação. Diferenças de grafia podem afetar comparações futuras."
+        helperText="Utilize o nome conforme consta na CNH."
         errorText={errors.fullName}
         onBlur={() => touch('fullName')}
       />
 
       <Input
         label="CPF do condutor"
+        placeholder="000.000.000-00"
         value={data.cpf}
         keyboardType="numeric"
         onChange={(v) =>
           onChange({ ...data, cpf: formatCPF(v) })
         }
-        helperText="Identificador fiscal utilizado para vincular registros administrativos ao condutor."
+        helperText="Identificador fiscal do condutor."
         errorText={errors.cpf}
         onBlur={() => touch('cpf')}
       />
 
       <Input
         label="Número de registro da CNH"
+        placeholder="Somente números"
         value={data.cnhNumber}
         keyboardType="numeric"
         onChange={(v) =>
-          onChange({ ...data, cnhNumber: onlyNumbers(v) })
+          onChange({
+            ...data,
+            cnhNumber: onlyNumbers(v),
+          })
         }
-        helperText="Número único de identificação da habilitação emitida pelo órgão de trânsito."
+        helperText="Número presente no documento de habilitação."
         errorText={errors.cnhNumber}
         onBlur={() => touch('cnhNumber')}
       />
 
-      <Input
-        label="Categoria da habilitação"
-        value={data.cnhCategory}
-        autoCapitalize="characters"
-        onChange={(v) =>
-          onChange({ ...data, cnhCategory: v.toUpperCase() })
-        }
-        helperText="Categoria válida no momento do cadastro."
-        errorText={errors.cnhCategory}
-        onBlur={() => touch('cnhCategory')}
-      />
+      {/* Categoria da CNH */}
+      <View className="gap-2">
+        <Text className="text-xs font-medium text-neutral-400">
+          Categoria da habilitação
+        </Text>
+
+        <View className="flex-row flex-wrap gap-2">
+          {VALID_CNH_CATEGORIES.map((category) => {
+            const selected = data.cnhCategory === category;
+
+            return (
+              <Text
+                key={category}
+                onPress={() => {
+                  onChange({ ...data, cnhCategory: category });
+                  touch('cnhCategory');
+                }}
+                className={[
+                  'px-3 py-2 rounded-md text-xs text-center',
+                  selected
+                    ? 'bg-amber-500 text-black'
+                    : 'bg-neutral-900 border border-neutral-700 text-neutral-300',
+                ].join(' ')}
+              >
+                {category}
+              </Text>
+            );
+          })}
+        </View>
+
+        {errors.cnhCategory && (
+          <Text className="text-xs text-red-400">
+            {errors.cnhCategory}
+          </Text>
+        )}
+      </View>
 
       <Input
-        label="Data de validade da habilitação"
+        label="Validade da habilitação"
+        placeholder="DD/MM/AAAA"
         value={data.cnhExpiry}
         keyboardType="numeric"
-        placeholder="DD/MM/AAAA"
         onChange={(v) =>
-          onChange({ ...data, cnhExpiry: formatDate(v) })
+          onChange({
+            ...data,
+            cnhExpiry: formatDate(v),
+          })
         }
-        helperText="Data final de vigência da CNH conforme documento emitido."
+        helperText="Data final de vigência conforme o documento."
         errorText={errors.cnhExpiry}
         onBlur={() => touch('cnhExpiry')}
       />
-    </>
+
+      <Input
+        label="UF do órgão emissor da CNH"
+        placeholder="Ex: SP"
+        value={data.cnhIssuerUF}
+        autoCapitalize="characters"
+        maxLength={2}
+        onChange={(v) =>
+          onChange({
+            ...data,
+            cnhIssuerUF: v.toUpperCase(),
+          })
+        }
+        helperText="Unidade federativa do DETRAN emissor."
+        errorText={errors.cnhIssuerUF}
+        onBlur={() => touch('cnhIssuerUF')}
+      />
+    </View>
   );
 }

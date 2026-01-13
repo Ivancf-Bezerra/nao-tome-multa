@@ -9,7 +9,7 @@ export default function TechnicalProfileCard({
   onPress,
 }: TechnicalProfileCardProps) {
   return (
-    <View className="mx-6 mt-4 rounded-2xl border border-slate-700 bg-slate-800 px-6 py-6">
+    <View className="mt-4 rounded-2xl border border-slate-700 bg-slate-800 px-6 py-6">
       <View className="flex-row items-center gap-3">
         <Ionicons
           name="id-card-outline"

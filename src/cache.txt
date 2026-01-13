@@ -359,3 +359,352 @@ Se não está aqui, NÃO EXISTE.
 ================================================================
 FIM DO DOCUMENTO
 ================================================================
+================================================================
+DOCUMENTO MESTRE — FONTE ÚNICA DE VERDADE (CONTRATO)
+PROJETO: NÃO TOME MULTA
+VERSÃO: MVP REAL v1.6 — ANÁLISE MANUAL FUNCIONAL
+STATUS: ATIVO — BASE EVOLUTIVA CONTROLADA
+PADRÃO: INSTITUCIONAL / BANCÁRIO PREMIUM (SEM PROMESSA)
+================================================================
+
+Este documento consolida TODAS as decisões técnicas,
+arquiteturais, visuais, conceituais e operacionais
+do projeto NÃO TOME MULTA.
+
+Ele é a ÚNICA fonte de verdade do projeto.
+
+Qualquer código, tela, fluxo, componente, copy ou
+decisão técnica que não esteja EXPLICITAMENTE alinhada
+a este documento é considerada INVÁLIDA.
+
+Este projeto é um MVP DE USO REAL.
+Não é protótipo. Não é conceito. Não é experimento visual.
+
+================================================================
+1. DEFINIÇÃO FORMAL DO MVP REAL
+================================================================
+
+O MVP REAL do NÃO TOME MULTA é definido como:
+
+- Aplicativo funcional
+- Usável por usuários reais
+- Fluxo coerente e fechado
+- Sem funcionalidades fictícias
+- Sem telas decorativas
+- Sem promessas implícitas ou explícitas
+
+REGRA FUNDAMENTAL:
+
+Todo código implementado DEVE:
+- Ser necessário para o funcionamento real do produto
+- Ter impacto direto na experiência do usuário
+- Resolver um problema explicitamente descrito aqui
+
+Código “para depois”, “para escalar”, “para o futuro” é PROIBIDO.
+
+================================================================
+2. CONTEXTO OPERACIONAL DO PRODUTO
+================================================================
+
+Aplicativo mobile desenvolvido em:
+
+- React Native
+- Expo (Managed Workflow)
+- TypeScript (obrigatório)
+- Expo Router (somente para páginas reais)
+- NativeWind (dark mode obrigatório)
+- Clerk (@clerk/clerk-expo)
+
+Objetivo do produto:
+
+- Organizar dados técnicos relacionados a autuações
+- Permitir análise técnica formal de multas
+- Reduzir ansiedade por clareza técnica
+- Oferecer previsibilidade informacional
+
+O aplicativo NÃO:
+- Presta advocacia
+- Substitui profissionais do direito
+- Garante inexistência de multas
+- Garante êxito administrativo ou judicial
+- Realiza monitoramento automático
+
+================================================================
+3. PRINCÍPIO SOBERANO DO PRODUTO
+================================================================
+
+O NÃO TOME MULTA deve:
+
+- Parecer mais organizado que sistemas públicos
+- Reduzir ansiedade por clareza, não por promessa
+- Operar com postura institucional
+- Manter linguagem formal, clara e contida
+
+Didático significa:
+- Explicar o PORQUÊ dos dados
+- Não infantilizar
+- Não prometer resultado
+- Não dramatizar consequências
+
+================================================================
+4. STACK TECNOLÓGICA AUTORIZADA (FECHADA)
+================================================================
+
+CORE:
+- React Native
+- Expo SDK (Managed)
+- TypeScript
+
+ROTEAMENTO:
+- Expo Router (apenas para páginas)
+- Modais locais NÃO usam Router
+
+ESTILIZAÇÃO:
+- NativeWind
+- Dark Mode obrigatório
+
+UI:
+- react-native-safe-area-context
+- expo-linear-gradient
+- @expo/vector-icons (Ionicons)
+
+AUTENTICAÇÃO:
+- Clerk (email + Google OAuth)
+
+PERSISTÊNCIA:
+- expo-secure-store
+- Somente para Cadastro Técnico
+- Análise NÃO persiste no MVP atual
+
+================================================================
+5. ARQUITETURA DE FLUXO (ATUAL)
+================================================================
+
+Fluxo macro obrigatório:
+
+1. app/index.tsx
+2. app/_layout.tsx (AuthGate)
+3. auth/login.tsx
+4. app/(tabs)/home.tsx
+
+Regras:
+
+- Nenhuma tela decide autenticação
+- Nenhuma UI executa regra de negócio
+- Nenhuma integração externa ativa no MVP
+- Contextos são fontes de verdade (não renderizam UI)
+
+================================================================
+6. HOME — ESTADO OPERACIONAL CENTRAL
+================================================================
+
+A Home é um ORQUESTRADOR DE ESTADOS.
+
+Ela:
+- Controla modais locais
+- Dispara análises técnicas
+- Centraliza logs de execução
+- Não contém regra de análise
+
+Implementado:
+- Header institucional
+- Mensagem de boas-vindas
+- Card de cadastro técnico
+- Preview do cadastro técnico
+- Card de análise técnica
+- Modal local de preenchimento de multa
+- Logs técnicos no terminal
+
+================================================================
+7. CADASTRO TÉCNICO — PRÉ-REQUISITO SOBERANO
+================================================================
+
+O Cadastro Técnico é OBRIGATÓRIO.
+
+Sem ele:
+- Não há análise técnica
+- Não há validação
+- Não há previsibilidade
+
+Formato:
+- Modal Bottom Sheet
+- Conteúdo rolável
+- CTA único
+- Fluxo em dois passos (Condutor → Veículo)
+
+================================================================
+8. DADOS DO CADASTRO TÉCNICO (ATUAL)
+================================================================
+
+CONDUTOR:
+- Nome completo
+- CPF
+- Número da CNH
+- Categoria da CNH
+- Validade da CNH
+- UF emissora da CNH
+
+VEÍCULO:
+- Placa
+- RENAVAM
+- Marca
+- Modelo
+- Cor (informativa)
+- Município
+- UF de registro
+
+Regras:
+- Campos nunca são undefined
+- String vazia é válida
+- Validação mínima antes de salvar
+
+================================================================
+9. ANÁLISE TÉCNICA DE MULTA (MVP ATUAL)
+================================================================
+
+A análise técnica no MVP:
+
+- É manual
+- É iniciada pelo usuário
+- Não consulta APIs externas
+- Não persiste resultados
+- Não gera defesa automática
+
+Fluxo:
+
+1. Usuário clica em "Adicionar multa"
+2. Modal local é aberto
+3. Usuário informa:
+   - ID da multa
+   - Descrição
+   - Observações (opcional)
+4. Análise é executada
+5. Resultado é logado no terminal
+
+================================================================
+10. MODELO DE DADOS — INFRACTION
+================================================================
+
+Regra soberana:
+
+- NÃO existem tipos duplicados
+- NÃO existem campos opcionais no domínio
+
+Tipo oficial:
+
+interface Infraction {
+  id: string;
+  description: string;
+  notes: string;
+}
+
+Se o usuário não preencher:
+- notes = ""
+
+Nunca undefined.
+
+================================================================
+11. SERVICE PATTERN — ANÁLISE
+================================================================
+
+Camadas:
+
+UI
+→ useInfractionSearch
+→ TechnicalAnalyzer
+→ AnalysisResult
+
+Regras:
+
+- useInfractionSearch apenas orquestra estado
+- TechnicalAnalyzer aplica regras técnicas
+- AnalysisResult consolida achados
+- UI apenas reage
+
+================================================================
+12. PADRÃO VISUAL GLOBAL
+================================================================
+
+PADRÃO: INSTITUCIONAL / BANCÁRIO
+
+Características:
+- Visual sóbrio
+- Tipografia hierárquica
+- Destaques apenas em ações
+- Nenhum tom promocional
+- Feedbacks discretos
+
+================================================================
+13. O QUE NÃO EXISTE (POR DECISÃO)
+================================================================
+
+- Monitoramento automático
+- Backend próprio
+- API externa
+- Histórico de análises
+- Salvamento de multas
+- Defesa automática
+- Recomendações jurídicas
+
+Se não está aqui, NÃO EXISTE.
+
+================================================================
+14. ESTADO ATUAL DO MVP (REAL)
+================================================================
+
+IMPLEMENTADO:
+- Autenticação
+- Cadastro técnico completo
+- Persistência local do cadastro
+- Análise manual funcional
+- Pipeline técnico real
+- Logs técnicos confiáveis
+- Modal local estável
+
+NÃO IMPLEMENTADO:
+- Persistência de análises
+- Visualização de extrato
+- Histórico
+- Exportação
+- Backend
+
+================================================================
+15. PRÓXIMOS PASSOS AUTORIZADOS
+================================================================
+
+ORDEM CONTROLADA:
+
+1. Extrato Técnico Visual
+   - Modal ou seção dedicada
+   - Lista de achados técnicos
+   - Sem linguagem jurídica
+
+2. Controle de Duplicidade
+   - Bloquear múltiplas análises com mesmo ID
+   - Validação local
+
+3. Encerramento de Fluxo
+   - Fechar modal após análise
+   - Feedback institucional
+
+4. Persistência Local (Opcional)
+   - Histórico mínimo
+   - Apenas no dispositivo
+
+================================================================
+REGRA FINAL (CONTRATO)
+================================================================
+
+Este documento é um CONTRATO.
+
+- Não interpretar
+- Não flexibilizar
+- Não antecipar
+- Não prometer
+- Não integrar fora do escopo
+
+Se não está aqui, NÃO EXISTE.
+
+================================================================
+FIM DO DOCUMENTO
+================================================================
