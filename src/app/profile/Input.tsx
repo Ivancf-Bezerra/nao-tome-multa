@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+import { useThemeClasses } from '../../context/ThemeContext';
+
 /**
  * CORREÇÃO TÉCNICA:
  * - Omitimos 'onChange' do tipo nativo para evitar colisão (Event vs string)
@@ -46,6 +48,7 @@ export default function Input({
   editable = true,
   ...rest
 }: InputProps) {
+  const tc = useThemeClasses();
   const [isFocused, setIsFocused] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -54,20 +57,25 @@ export default function Input({
 
   const getBorderColor = () => {
     if (hasError) return 'border-amber-500';
-    if (isFocused) return 'border-slate-500';
-    return 'border-slate-700';
+    if (isFocused) return tc.inputFocusBorder;
+    return tc.inputBorder;
   };
+
+  const inputBg = tc.input;
+  const labelClass = tc.textMuted;
+  const inputTextClass = tc.text;
+  const placeholderColor = tc.iconMuted;
 
   return (
     <View className="mt-4">
       {/* LABEL */}
-      <Text className="mb-1.5 text-xs font-medium text-slate-400 uppercase tracking-wide">
+      <Text className={`mb-1.5 text-xs font-medium uppercase tracking-wide ${labelClass}`}>
         {label}
       </Text>
 
       {/* INPUT + ÍCONE */}
       <View
-        className={`flex-row items-center rounded-lg border bg-slate-800 px-4 ${getBorderColor()}`}
+        className={`flex-row items-center rounded-lg border px-4 ${inputBg} ${getBorderColor()}`}
       >
         <TextInput
           value={value}
@@ -84,9 +92,9 @@ export default function Input({
             setIsFocused(false);
             onBlur?.(e);
           }}
-          className="flex-1 py-3.5 text-sm text-white"
-          placeholderTextColor="#64748b"
-          cursorColor="#fbbf24"
+          className={`flex-1 py-3.5 text-sm ${inputTextClass}`}
+          placeholderTextColor={placeholderColor}
+          cursorColor="#f59e0b"
           {...rest}
         />
 
@@ -99,7 +107,7 @@ export default function Input({
             <Ionicons
               name={rightIcon}
               size={18}
-              color="#94a3b8"
+              color={tc.iconMuted}
             />
           </Pressable>
         )}
@@ -107,7 +115,7 @@ export default function Input({
 
       {/* DROPDOWN (SEM FlatList) */}
       {hasDropdown && open && (
-        <View className="mt-1 max-h-48 rounded-lg border border-slate-700 bg-slate-800">
+        <View className={`mt-1 max-h-48 rounded-lg border ${tc.input} ${tc.inputBorder}`}>
           <ScrollView
             keyboardShouldPersistTaps="handled"
           >
@@ -118,9 +126,9 @@ export default function Input({
                   onSelectOption?.(item);
                   setOpen(false);
                 }}
-                className="px-4 py-3 border-b border-slate-700"
+                className={`px-4 py-3 border-b ${tc.inputBorderB}`}
               >
-                <Text className="text-sm text-white">
+                <Text className={`text-sm ${inputTextClass}`}>
                   {item}
                 </Text>
               </Pressable>
@@ -137,7 +145,7 @@ export default function Input({
           </Text>
         </View>
       ) : helperText ? (
-        <Text className="mt-1.5 text-xs text-slate-500 leading-tight">
+        <Text className={`mt-1.5 text-xs leading-tight ${tc.textSubtle}`}>
           {helperText}
         </Text>
       ) : null}

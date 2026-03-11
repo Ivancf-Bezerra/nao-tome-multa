@@ -8,32 +8,49 @@ import { useUser } from '@clerk/clerk-expo';
 
 import { activateSubscription } from '../../services/subscription/subscriptionService';
 import { useSubscription } from '../../context/SubscriptionContext';
+import { useThemeClasses } from '../../context/ThemeContext';
 
-const PLAN = {
-  id: 'monthly',
-  title: 'Plano Mensal',
-  price: 'R$ 29,90',
-  period: '/mês',
-  features: [
-    'Análise técnica de infrações ilimitada',
-    'Geração de Defesa Prévia',
-    'Geração de Recurso à JARI',
-    'Histórico de defesas salvo',
-    'Compartilhamento de documentos',
-  ],
-};
+const PLANS = [
+  {
+    id: 'starter' as const,
+    title: 'Plano Básico',
+    price: 'R$ 19,90',
+    period: '/mês',
+    highlight: 'Econômico',
+    description: 'Para uso ocasional no mês.',
+    features: [
+      'Análises técnicas para uso eventual',
+      'Geração de Defesa Prévia',
+      'Histórico de defesas salvo',
+    ],
+  },
+  {
+    id: 'monthly' as const,
+    title: 'Plano Ilimitado',
+    price: 'R$ 39,90',
+    period: '/mês',
+    highlight: 'Recomendado',
+    description: 'Para uso frequente e intenso.',
+    features: [
+      'Análises técnicas ilimitadas',
+      'Defesa Prévia e Recurso à JARI',
+      'Histórico completo salvo',
+    ],
+  },
+];
 
 export default function PlansScreen() {
   const router = useRouter();
   const { user } = useUser();
-  const { isActive, refresh } = useSubscription();
+  const { isActive, plan, refresh } = useSubscription();
+  const tc = useThemeClasses();
   const [loading, setLoading] = useState(false);
 
-  async function handleSubscribe() {
+  async function handleSubscribe(planId: 'starter' | 'monthly') {
     if (!user?.id || loading) return;
     setLoading(true);
     try {
-      await activateSubscription(user.id, 'monthly', 30);
+      await activateSubscription(user.id, planId, 30);
       await refresh();
       router.replace('/(tabs)/home');
     } finally {
@@ -42,10 +59,10 @@ export default function PlansScreen() {
   }
 
   return (
-    <View className="flex-1 bg-slate-900">
-      <StatusBar style="light" />
+    <View className={`flex-1 ${tc.screen}`}>
+      <StatusBar style={tc.statusBar} />
 
-      <LinearGradient colors={['#0f172a', '#1e293b']} style={{ flex: 1 }}>
+      <LinearGradient colors={[...tc.screenGradient]} style={{ flex: 1 }}>
         <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
           <ScrollView
             contentContainerStyle={{ flexGrow: 1 }}
@@ -54,78 +71,99 @@ export default function PlansScreen() {
             {/* HEADER */}
             <View className="px-6 pt-6 pb-2">
               <Pressable onPress={() => router.back()} className="mb-6">
-                <Text className="text-slate-400 text-sm">← Voltar</Text>
+                <Text className={`${tc.textMuted} text-sm`}>← Voltar</Text>
               </Pressable>
 
-              <Text className="text-white text-2xl font-bold">
+              <Text className={`${tc.text} text-2xl font-bold`}>
                 Planos de acesso
               </Text>
-              <Text className="text-slate-400 text-sm mt-2 leading-relaxed">
+              <Text className={`${tc.textMuted} text-sm mt-2 leading-relaxed`}>
                 Tenha acesso à geração de defesas técnicas baseadas em inconsistências formais detectadas no auto de infração.
               </Text>
             </View>
 
-            {/* CARD DE PLANO */}
-            <View className="mx-6 mt-8 rounded-2xl border border-amber-400/30 bg-slate-800 p-6">
-              <View className="flex-row items-start justify-between">
-                <View className="flex-1">
-                  <Text className="text-amber-400 text-xs font-semibold uppercase tracking-widest">
-                    Mais popular
-                  </Text>
-                  <Text className="text-white text-xl font-bold mt-1">
-                    {PLAN.title}
-                  </Text>
-                </View>
+            {/* CARDS DE PLANOS */}
+            <View className="mx-6 mt-8 gap-4">
+              {PLANS.map((p) => {
+                const isCurrent = isActive && plan === p.id;
+                const isOtherActive = isActive && plan !== p.id;
+                const isDisabled = loading;
+                const buttonLabel = isCurrent
+                  ? 'Plano atual'
+                  : isOtherActive
+                  ? 'Mudar para este plano'
+                  : 'Assinar plano';
 
-                <View className="items-end">
-                  <Text className="text-white text-2xl font-bold">
-                    {PLAN.price}
-                  </Text>
-                  <Text className="text-slate-400 text-xs">{PLAN.period}</Text>
-                </View>
-              </View>
-
-              <View className="mt-6 gap-3">
-                {PLAN.features.map((feature) => (
-                  <View key={feature} className="flex-row items-center gap-3">
-                    <View className="w-5 h-5 rounded-full bg-amber-400/20 items-center justify-center">
-                      <Text className="text-amber-400 text-xs font-bold">✓</Text>
-                    </View>
-                    <Text className="text-slate-300 text-sm flex-1">{feature}</Text>
-                  </View>
-                ))}
-              </View>
-
-              <Pressable
-                onPress={handleSubscribe}
-                disabled={loading || isActive}
-                className={`mt-8 rounded-xl py-4 items-center ${
-                  isActive ? 'bg-slate-700' : 'bg-amber-400 active:opacity-90'
-                }`}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#0f172a" />
-                ) : (
-                  <Text
-                    className={`text-sm font-bold ${
-                      isActive ? 'text-slate-500' : 'text-slate-900'
-                    }`}
+                return (
+                  <View
+                    key={p.id}
+                    className={`rounded-2xl p-6 border ${
+                      p.id === 'monthly' ? 'border-amber-400/40' : tc.border
+                    } ${tc.card}`}
                   >
-                    {isActive ? 'Plano já ativo' : 'Assinar agora'}
-                  </Text>
-                )}
-              </Pressable>
+                    <View className="flex-row items-start justify-between">
+                      <View className="flex-1">
+                        <Text className="text-amber-500 text-xs font-semibold uppercase tracking-widest">
+                          {p.highlight}
+                        </Text>
+                        <Text className={`${tc.text} text-xl font-bold mt-1`}>
+                          {p.title}
+                        </Text>
+                        <Text className={`${tc.textMuted} text-xs mt-1`}>
+                          {p.description}
+                        </Text>
+                      </View>
 
-              {!isActive && (
-                <Text className="text-center text-xs text-slate-500 mt-3">
-                  Cancele a qualquer momento. Sem fidelidade.
-                </Text>
-              )}
+                      <View className="items-end">
+                        <Text className={`${tc.text} text-2xl font-bold`}>
+                          {p.price}
+                        </Text>
+                        <Text className={`${tc.textMuted} text-xs`}>{p.period}</Text>
+                      </View>
+                    </View>
+
+                    <View className="mt-6 gap-3">
+                      {p.features.map((feature) => (
+                        <View key={feature} className="flex-row items-center gap-3">
+                          <View className="w-5 h-5 rounded-full bg-amber-400/15 items-center justify-center">
+                            <Text className="text-amber-500 text-xs font-bold">✓</Text>
+                          </View>
+                          <Text className={`${tc.buttonSecondaryText} text-sm flex-1`}>
+                            {feature}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+
+                    <Pressable
+                      onPress={() => handleSubscribe(p.id)}
+                      disabled={isDisabled}
+                      className={`mt-6 rounded-xl py-3 items-center ${
+                        isCurrent
+                          ? tc.buttonSecondary
+                          : 'bg-amber-400 active:opacity-90'
+                      }`}
+                    >
+                      {loading ? (
+                        <ActivityIndicator color="#0f172a" />
+                      ) : (
+                        <Text
+                          className={`text-sm font-bold ${
+                            isCurrent ? tc.textSubtle : 'text-slate-900'
+                          }`}
+                        >
+                          {buttonLabel}
+                        </Text>
+                      )}
+                    </Pressable>
+                  </View>
+                );
+              })}
             </View>
 
             {/* AVISO LEGAL */}
             <View className="mx-6 mt-8 mb-6">
-              <Text className="text-xs text-slate-600 text-center leading-relaxed">
+              <Text className={`text-xs text-center leading-relaxed ${tc.textSubtle}`}>
                 As defesas geradas são de caráter técnico-informacional e não constituem orientação jurídica.
                 O serviço não garante êxito administrativo ou judicial.
               </Text>

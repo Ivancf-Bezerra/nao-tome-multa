@@ -1,4 +1,5 @@
 import { View, Text } from 'react-native';
+
 import Input from '../profile/Input';
 import { InfractionInput } from '../../services/infractions/types';
 import { formatDate } from '../profile/masks';
@@ -13,7 +14,7 @@ interface Props {
 function Section({ title }: { title: string }) {
   return (
     <View className="mt-6 mb-2">
-      <Text className="text-xs font-semibold text-amber-400 uppercase tracking-widest">
+      <Text className="text-xs font-semibold text-amber-500 uppercase tracking-widest">
         {title}
       </Text>
     </View>

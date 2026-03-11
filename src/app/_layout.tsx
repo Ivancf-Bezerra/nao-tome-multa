@@ -1,17 +1,18 @@
-import '../../global.css';
 import {
-  ClerkProvider,
-  ClerkLoaded,
-  useAuth,
-  useUser,
+    ClerkLoaded,
+    ClerkProvider,
+    useAuth,
+    useUser,
 } from '@clerk/clerk-expo';
 import { Slot, useRouter, useSegments } from 'expo-router';
-import { useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import { useEffect } from 'react';
+import '../../global.css';
 
-import { TechnicalProfileProvider } from '../context/TechnicalProfileContext';
-import { SubscriptionProvider } from '../context/SubscriptionContext';
 import { StatusMultasProvider } from '../context/StatusMultasContext';
+import { SubscriptionProvider } from '../context/SubscriptionContext';
+import { TechnicalProfileProvider } from '../context/TechnicalProfileContext';
+import { ThemeProvider } from '../context/ThemeContext';
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
@@ -81,13 +82,15 @@ function AuthGate() {
   }, [isSignedIn, isLoaded, segments]);
 
   return (
-    <TechnicalProfileProvider key={user?.id ?? 'guest'}>
-      <SubscriptionProvider>
-        <StatusMultasProvider>
-          <Slot />
-        </StatusMultasProvider>
-      </SubscriptionProvider>
-    </TechnicalProfileProvider>
+    <ThemeProvider>
+      <TechnicalProfileProvider key={user?.id ?? 'guest'}>
+        <SubscriptionProvider>
+          <StatusMultasProvider>
+            <Slot />
+          </StatusMultasProvider>
+        </SubscriptionProvider>
+      </TechnicalProfileProvider>
+    </ThemeProvider>
   );
 }
 

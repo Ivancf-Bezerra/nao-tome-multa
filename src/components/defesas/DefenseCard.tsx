@@ -1,6 +1,8 @@
-import React from 'react';
-import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { Pressable, Text, View } from 'react-native';
+
+import { useThemeClasses } from '../../context/ThemeContext';
 import { AnalyzedInfractionRecord, InconsistencySeverity } from './types';
 
 type Props = {
@@ -31,31 +33,32 @@ function severityColor(s: InconsistencySeverity): string {
 }
 
 export default function DefenseCard({ record, onView, onSend, onDelete }: Props) {
+  const tc = useThemeClasses();
   const hasDefense = Boolean(record.defense?.defesaPrevia?.trim());
   const topSeverity = record.result.findings[0]?.severity;
 
   return (
-    <View className="rounded-2xl border border-slate-800 bg-slate-900 p-4 mb-4">
+    <View className={`rounded-2xl p-4 mb-4 ${tc.cardAlt}`}>
       <View className="flex-row items-start justify-between">
         <Pressable onPress={onView} className="flex-1 pr-3">
           <View className="flex-row items-center">
             <Ionicons
               name="alert-circle"
               size={16}
-              color={topSeverity ? severityColor(topSeverity) : '#fbbf24'}
+              color={topSeverity ? severityColor(topSeverity) : '#f59e0b'}
             />
-            <Text className="text-white font-semibold ml-2">
+            <Text className={`font-semibold ml-2 ${tc.text}`}>
               AIT #{record.input.aitNumber || record.id}
             </Text>
           </View>
 
-          <Text className="text-slate-400 text-sm mt-2">
+          <Text className={`${tc.textMuted} text-sm mt-2`}>
             {clampText(record.input.description, 90)}
           </Text>
 
           <View className="flex-row items-center mt-3">
-            <Ionicons name="time-outline" size={14} color="#94a3b8" />
-            <Text className="text-slate-300 text-xs ml-2">
+            <Ionicons name="time-outline" size={14} color={tc.iconMuted} />
+            <Text className={`${tc.buttonSecondaryText} text-xs ml-2`}>
               {formatDate(record.analyzedAt)}
             </Text>
 
@@ -65,7 +68,7 @@ export default function DefenseCard({ record, onView, onSend, onDelete }: Props)
                 size={14}
                 color={hasDefense ? '#22c55e' : '#60a5fa'}
               />
-              <Text className="text-slate-300 text-xs ml-2">
+              <Text className={`${tc.buttonSecondaryText} text-xs ml-2`}>
                 {hasDefense ? 'Defesa gerada' : 'Aguardando defesa'}
               </Text>
             </View>
@@ -77,36 +80,36 @@ export default function DefenseCard({ record, onView, onSend, onDelete }: Props)
             onPress={onView}
             className="h-10 w-10 items-center justify-center rounded-xl"
           >
-            <Ionicons name="eye-outline" size={18} color="#94a3b8" />
+            <Ionicons name="eye-outline" size={18} color={tc.iconMuted} />
           </Pressable>
 
           <Pressable
             onPress={hasDefense ? onSend : undefined}
             disabled={!hasDefense}
             className={`h-10 w-10 items-center justify-center rounded-xl ml-2 ${
-              hasDefense ? 'bg-slate-800 active:opacity-90' : 'bg-slate-800/50 opacity-60'
+              hasDefense ? `${tc.buttonSecondary} active:opacity-90` : `${tc.buttonSecondary} opacity-60`
             }`}
           >
             <Ionicons
               name="send-outline"
               size={18}
-              color={hasDefense ? '#fbbf24' : '#64748b'}
+              color={hasDefense ? '#f59e0b' : tc.iconMuted}
             />
           </Pressable>
 
           <Pressable
             onPress={onDelete}
-            className="h-10 w-10 items-center justify-center rounded-xl bg-slate-800 ml-2"
+            className={`h-10 w-10 items-center justify-center rounded-xl ml-2 ${tc.buttonSecondary}`}
           >
-            <Ionicons name="trash-outline" size={18} color="#94a3b8" />
+            <Ionicons name="trash-outline" size={18} color={tc.iconMuted} />
           </Pressable>
         </View>
       </View>
 
-      <View className="mt-4 pt-4 border-t border-slate-800">
-        <Text className="text-slate-300 text-xs">
+      <View className={`mt-4 pt-4 ${tc.borderB}`}>
+        <Text className={`${tc.buttonSecondaryText} text-xs`}>
           Resumo:{' '}
-          <Text className="text-white">{record.result.summary}</Text>
+          <Text className={tc.text}>{record.result.summary}</Text>
         </Text>
       </View>
     </View>

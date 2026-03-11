@@ -1,6 +1,8 @@
 // src/components/ui/CardContainer.tsx
-import { View, Pressable } from 'react-native';
 import { ReactNode } from 'react';
+import { Pressable, View } from 'react-native';
+
+import { useThemeClasses } from '../../context/ThemeContext';
 
 interface CardContainerProps {
   children: ReactNode;
@@ -14,12 +16,13 @@ export default function CardContainer({
   onPress,
 }: CardContainerProps) {
   const Container = onPress ? Pressable : View;
+  const tc = useThemeClasses();
 
   const variants = {
     primary:
-      'mb-6 rounded-3xl bg-[#fbbf24] px-6 py-6 active:opacity-90',
+      'mb-6 rounded-3xl bg-amber-400 px-6 py-6 active:opacity-90',
     default:
-      'mb-6 rounded-3xl border border-slate-700 bg-slate-800 px-6 py-6',
+      `mb-6 rounded-3xl px-6 py-6 ${tc.card}`,
   };
 
   return (

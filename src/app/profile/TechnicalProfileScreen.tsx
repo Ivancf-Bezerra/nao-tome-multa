@@ -54,12 +54,36 @@ const INITIAL_VEHICLE: VehicleData = __DEV__ ? { ...SAMPLE_VEHICLE } : EMPTY_VEH
 
 export default function TechnicalProfileScreen() {
   const router = useRouter();
-  const { saveProfile } = useTechnicalProfile();
+  const { profile, saveProfile } = useTechnicalProfile();
 
   const [step, setStep] = useState<Step>('driver');
 
-  const [driver, setDriver] = useState<DriverData>(INITIAL_DRIVER);
-  const [vehicle, setVehicle] = useState<VehicleData>(INITIAL_VEHICLE);
+  const [driver, setDriver] = useState<DriverData>(
+    profile
+      ? {
+          fullName: profile.driver.fullName,
+          cpf: profile.driver.cpf,
+          cnhNumber: profile.driver.cnhNumber,
+          cnhCategory: profile.driver.cnhCategory,
+          cnhExpiry: profile.driver.cnhExpiry,
+          cnhIssuerUF: profile.driver.cnhIssuerUF,
+        }
+      : INITIAL_DRIVER,
+  );
+  const [vehicle, setVehicle] = useState<VehicleData>(
+    profile
+      ? {
+          plate: profile.vehicle.plate,
+          renavam: profile.vehicle.renavam,
+          brand: profile.vehicle.brand,
+          model: profile.vehicle.model,
+          city: profile.vehicle.city,
+          uf: profile.vehicle.uf,
+          color: profile.vehicle.color,
+          ownerCpf: profile.vehicle.ownerCpf,
+        }
+      : INITIAL_VEHICLE,
+  );
 
   /* =======================
      VALIDAÇÃO MÍNIMA
@@ -94,6 +118,19 @@ export default function TechnicalProfileScreen() {
 
     const driverCpfDigits = onlyNumbers(driver.cpf);
     const ownerCpfDigits = onlyNumbers(vehicle.ownerCpf);
+
+    // Se já existe um cadastro técnico salvo, o CPF do condutor não pode ser trocado:
+    // o aplicativo é destinado ao próprio proprietário do veículo.
+    if (profile?.driver?.cpf) {
+      const existingCpfDigits = onlyNumbers(profile.driver.cpf);
+      if (existingCpfDigits && existingCpfDigits !== driverCpfDigits) {
+        Alert.alert(
+          'CPF diferente do cadastro atual',
+          'Este aplicativo é destinado ao proprietário do veículo. O cadastro técnico já está vinculado a outro CPF de condutor. Para usar um CPF diferente, exclua o cadastro técnico atual e crie um novo.',
+        );
+        return;
+      }
+    }
 
     if (ownerCpfDigits && ownerCpfDigits !== driverCpfDigits) {
       Alert.alert(

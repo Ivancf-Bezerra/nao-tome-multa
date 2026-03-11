@@ -8,7 +8,7 @@ import {
 import { useUser } from '@clerk/clerk-expo';
 import { getSubscription } from '../services/subscription/subscriptionService';
 
-export type PlanType = 'none' | 'monthly';
+export type PlanType = 'none' | 'starter' | 'monthly';
 
 export interface SubscriptionState {
   plan: PlanType;

@@ -1,22 +1,22 @@
 import {
-  Text,
-  View,
-  Pressable,
-  Modal,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
+    useAuth,
+    useOAuth,
+    useSignIn,
+} from '@clerk/clerk-expo';
 import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import {
-  useSignIn,
-  useOAuth,
-  useAuth,
-} from '@clerk/clerk-expo';
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    Pressable,
+    Text,
+    TextInput,
+    View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Step = 'email' | 'code';
 

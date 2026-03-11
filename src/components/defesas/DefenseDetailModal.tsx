@@ -1,15 +1,16 @@
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  Modal,
-  Pressable,
-  ScrollView,
-  TextInput,
-  ActivityIndicator,
+    ActivityIndicator,
+    Modal,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 
+import { useThemeClasses } from '../../context/ThemeContext';
 import { AnalyzedInfractionRecord, InconsistencySeverity } from './types';
 
 type Props = {
@@ -22,8 +23,6 @@ type Props = {
   onSaveDefense?: () => void;
   onDelete: () => void;
 };
-
-type Tab = 'defesa' | 'jari';
 
 function getSeverityIcon(severity: InconsistencySeverity) {
   if (severity === 'critical') return 'alert-circle' as const;
@@ -63,22 +62,17 @@ export default function DefenseDetailModal({
   onSaveDefense,
   onDelete,
 }: Props) {
-  const [activeTab, setActiveTab] = useState<Tab>('defesa');
+  const tc = useThemeClasses();
 
   const hasDefesa = Boolean(record?.defense?.defesaPrevia?.trim());
-  const hasJARI = Boolean(record?.defense?.recursoJARI?.trim());
-
-  const displayText =
-    activeTab === 'defesa'
-      ? record?.defense?.defesaPrevia ?? ''
-      : record?.defense?.recursoJARI ?? '';
+  const displayText = record?.defense?.defesaPrevia ?? '';
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View className="flex-1 justify-end bg-black/60">
+      <View className={`flex-1 justify-end ${tc.modalOverlay}`}>
         <Pressable className="absolute inset-0" onPress={onClose} />
 
-        <View className="rounded-t-3xl border-t border-slate-800 bg-slate-900 px-6 pt-6 pb-8 max-h-[85%]">
+        <View className={`rounded-t-3xl border-t px-6 pt-6 pb-8 max-h-[85%] ${tc.modalBg} ${tc.border}`}>
           {!record ? (
             <View className="py-10 items-center justify-center">
               <ActivityIndicator />
@@ -86,26 +80,26 @@ export default function DefenseDetailModal({
           ) : (
             <ScrollView contentContainerStyle={{ paddingBottom: 18 }} showsVerticalScrollIndicator={false}>
               {/* HEADER */}
-              <Text className="text-base font-semibold text-white">
+              <Text className={`text-base font-semibold ${tc.text}`}>
                 Análise técnica
               </Text>
-              <Text className="text-slate-400 text-xs mt-1">
+              <Text className={`${tc.textMuted} text-xs mt-1`}>
                 Conteúdo técnico-informacional. Não constitui orientação legal.
               </Text>
 
               {/* INFO DA MULTA */}
-              <View className="mt-4 rounded-2xl border border-slate-800 bg-slate-800/50 p-4">
-                <Text className="text-white font-semibold">
+              <View className={`mt-4 rounded-2xl p-4 ${tc.cardAlt}`}>
+                <Text className={`font-semibold ${tc.text}`}>
                   AIT #{record.input.aitNumber || record.id}
                 </Text>
                 {Boolean(record.input.description) && (
-                  <Text className="text-slate-400 text-sm mt-1">
+                  <Text className={`${tc.textMuted} text-sm mt-1`}>
                     {record.input.description}
                   </Text>
                 )}
                 <View className="flex-row items-center mt-2">
-                  <Ionicons name="time-outline" size={14} color="#94a3b8" />
-                  <Text className="text-slate-300 text-xs ml-2">
+                  <Ionicons name="time-outline" size={14} color={tc.iconMuted} />
+                  <Text className={`${tc.buttonSecondaryText} text-xs ml-2`}>
                     {formatDate(record.analyzedAt)}
                   </Text>
                 </View>
@@ -113,14 +107,14 @@ export default function DefenseDetailModal({
 
               {/* ACHADOS */}
               <View className="mt-5">
-                <Text className="text-white font-semibold mb-3">
+                <Text className={`font-semibold mb-3 ${tc.text}`}>
                   Inconsistências detectadas ({record.result.findings.length})
                 </Text>
 
                 {record.result.findings.map((f) => (
                   <View
                     key={f.code}
-                    className="rounded-2xl border border-slate-800 bg-slate-900 p-4 mb-3"
+                    className={`rounded-2xl p-4 mb-3 ${tc.cardAlt}`}
                   >
                     <View className="flex-row items-center gap-2">
                       <Ionicons
@@ -129,7 +123,7 @@ export default function DefenseDetailModal({
                         color={getSeverityColor(f.severity)}
                       />
                       <View className="flex-1">
-                        <Text className="text-white font-semibold text-sm">
+                        <Text className={`font-semibold text-sm ${tc.text}`}>
                           {f.title}
                         </Text>
                         <Text
@@ -140,84 +134,53 @@ export default function DefenseDetailModal({
                         </Text>
                       </View>
                     </View>
-                    <Text className="text-slate-400 text-sm mt-2">
+                    <Text className={`${tc.textMuted} text-sm mt-2`}>
                       {f.description}
                     </Text>
                   </View>
                 ))}
               </View>
 
-              {/* DEFESA PRÉVIA (inicial só defesa; JARI em botão separado) */}
+              {/* DEFESA PRÉVIA (Recurso à JARI só na aba Status quando indeferido) */}
               {hasDefesa && (
                 <View className="mt-5">
-                  {/* Tabs só quando já tem Recurso JARI gerado */}
-                  {hasJARI ? (
-                    <View className="flex-row rounded-xl border border-slate-700 bg-slate-800 p-1 mb-4">
-                      <Pressable
-                        onPress={() => setActiveTab('defesa')}
-                        className={`flex-1 rounded-lg py-2 items-center ${
-                          activeTab === 'defesa' ? 'bg-slate-700' : ''
-                        }`}
-                      >
-                        <Text
-                          className={`text-xs font-semibold ${
-                            activeTab === 'defesa' ? 'text-white' : 'text-slate-500'
-                          }`}
-                        >
-                          Defesa Prévia
-                        </Text>
-                      </Pressable>
-                      <Pressable
-                        onPress={() => setActiveTab('jari')}
-                        className={`flex-1 rounded-lg py-2 items-center ${
-                          activeTab === 'jari' ? 'bg-slate-700' : ''
-                        }`}
-                      >
-                        <Text
-                          className={`text-xs font-semibold ${
-                            activeTab === 'jari' ? 'text-white' : 'text-slate-500'
-                          }`}
-                        >
-                          Recurso JARI
-                        </Text>
-                      </Pressable>
-                    </View>
-                  ) : (
-                    <Text className="text-amber-400/90 text-xs font-semibold mb-3">
-                      Defesa Prévia
-                    </Text>
-                  )}
+                  <Text className="text-amber-500 text-xs font-semibold mb-3">
+                    Defesa Prévia
+                  </Text>
 
-                  <View className="rounded-2xl border border-slate-800 bg-slate-800/50 p-4">
+                  <View className={`rounded-2xl p-4 ${tc.cardAlt}`}>
                     <TextInput
                       value={displayText}
                       editable={false}
                       multiline
                       textAlignVertical="top"
-                      className="text-slate-300 text-xs leading-relaxed min-h-[200px]"
+                      className={`text-xs leading-relaxed min-h-[200px] ${tc.buttonSecondaryText}`}
                       selectTextOnFocus
                     />
                   </View>
 
                   {record.defense?.updatedAt && (
-                    <Text className="text-center text-xs text-slate-600 mt-2">
+                    <Text className={`text-center text-xs mt-2 ${tc.textSubtle}`}>
                       Gerada em {formatDate(record.defense.updatedAt)}
                     </Text>
                   )}
 
-                  {/* Salvar defesa (fecha o modal após salvar) */}
+                  {/* Salvar e Enviar defesa (salva, abre share, adiciona ao Status e redireciona) */}
                   {onSaveDefense && (
                     <Pressable
                       onPress={onSaveDefense}
-                      className="mt-4 rounded-xl border border-slate-600 bg-slate-800 py-3 flex-row items-center justify-center gap-2 active:opacity-90"
+                      disabled={saveFeedback}
+                      className={`mt-4 rounded-xl py-3 flex-row items-center justify-center gap-2 active:opacity-90 border ${
+                        saveFeedback ? 'opacity-70' : ''
+                      } ${tc.buttonSecondary}`}
                     >
-                      <Ionicons name="save-outline" size={18} color="#e2e8f0" />
-                      <Text className="text-sm font-semibold text-slate-200">
-                        Salvar defesa
+                      <Ionicons name="send" size={18} color={tc.iconPrimary} />
+                      <Text className={`text-sm font-semibold ${tc.buttonSecondaryText}`}>
+                        {saveFeedback ? 'Enviando…' : 'Salvar e Enviar Defesa'}
                       </Text>
                       {saveFeedback && (
-                        <Text className="text-emerald-400 text-xs font-medium ml-1">
-                          Salvo!
+                        <Text className="text-emerald-500 text-xs font-medium ml-1">
+                          …
                         </Text>
                       )}
                     </Pressable>
@@ -231,13 +194,13 @@ export default function DefenseDetailModal({
                   disabled={isSaving}
                   onPress={onGenerateDefense}
                   className={`mt-6 rounded-xl py-4 ${
-                    isSaving ? 'bg-slate-800' : 'bg-amber-400 active:opacity-90'
+                    isSaving ? tc.buttonSecondary : 'bg-amber-400 active:opacity-90'
                   }`}
                 >
                   {isSaving ? (
                     <View className="flex-row items-center justify-center gap-3">
                       <ActivityIndicator color="#0f172a" />
-                      <Text className="text-sm font-semibold text-slate-500">
+                      <Text className={`text-sm font-semibold ${tc.textSubtle}`}>
                         Gerando…
                       </Text>
                     </View>
@@ -252,11 +215,11 @@ export default function DefenseDetailModal({
               <View className="mt-3 flex-row gap-3">
                 <Pressable
                   onPress={onClose}
-                  className="flex-1 rounded-xl border border-slate-700 bg-slate-800 py-4 active:opacity-90"
+                  className={`flex-1 rounded-xl py-4 active:opacity-90 border ${tc.buttonSecondary}`}
                 >
                   <View className="flex-row items-center justify-center gap-2">
-                    <Ionicons name="arrow-back" size={18} color="#e2e8f0" />
-                    <Text className="text-sm font-semibold text-slate-200">
+                    <Ionicons name="arrow-back" size={18} color={tc.iconPrimary} />
+                    <Text className={`text-sm font-semibold ${tc.buttonSecondaryText}`}>
                       Voltar
                     </Text>
                   </View>

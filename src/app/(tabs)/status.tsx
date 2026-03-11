@@ -8,6 +8,8 @@ import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useStatusMultas } from '../../context/StatusMultasContext';
+import { useSubscription } from '../../context/SubscriptionContext';
+import { useThemeClasses } from '../../context/ThemeContext';
 import { addStatusMulta } from '../../storage/statusStorage';
 import { buildSampleStatusIndeferidos } from '../../data/status/sampleStatusMultas';
 import { useTechnicalProfile } from '../../context/TechnicalProfileContext';
@@ -61,22 +63,25 @@ function hasRecursoJARI(item: StatusMultaEnviada): boolean {
 type StatusCardProps = {
   item: StatusMultaEnviada;
   onOpenJARIModal: (item: StatusMultaEnviada) => void;
+  canUseJARI: boolean;
 };
 
-function StatusCard({ item, onOpenJARIModal }: StatusCardProps) {
+function StatusCard({ item, onOpenJARIModal, canUseJARI }: StatusCardProps) {
+  const tc = useThemeClasses();
   const color = statusColor(item.status);
-  const showJARIOption = canShowJARIOption(item);
+  const eligibleForJARI = canShowJARIOption(item);
+  const showJARIOption = canUseJARI && eligibleForJARI;
   const hasRecurso = hasRecursoJARI(item);
 
   return (
-    <View className="mb-4 rounded-2xl border border-slate-800 bg-slate-800/80 p-4">
+    <View className={`mb-4 rounded-2xl p-4 ${tc.cardAlt}`}>
       <View className="flex-row items-start justify-between">
         <View className="flex-1 pr-3">
-          <Text className="text-white font-semibold">
+          <Text className={`font-semibold ${tc.text}`}>
             AIT #{item.aitNumber || item.id}
           </Text>
           {item.description ? (
-            <Text className="text-slate-400 text-sm mt-1" numberOfLines={2}>
+            <Text className={`${tc.textMuted} text-sm mt-1`} numberOfLines={2}>
               {item.description}
             </Text>
           ) : null}
@@ -93,17 +98,17 @@ function StatusCard({ item, onOpenJARIModal }: StatusCardProps) {
           </Text>
         </View>
       </View>
-      <Text className="text-slate-500 text-xs mt-3 leading-5">
+      <Text className={`${tc.textSubtle} text-xs mt-3 leading-5`}>
         {STATUS_DESCRIPTIONS[item.status]}
       </Text>
       {item.lastMessage ? (
-        <Text className="text-slate-300 text-sm mt-2">
+        <Text className={`${tc.buttonSecondaryText} text-sm mt-2`}>
           {item.lastMessage}
         </Text>
       ) : null}
       <View className="flex-row items-center mt-3">
-        <Ionicons name="time-outline" size={12} color="#64748b" />
-        <Text className="text-slate-500 text-xs ml-2">
+        <Ionicons name="time-outline" size={12} color={tc.iconMuted} />
+        <Text className={`${tc.textSubtle} text-xs ml-2`}>
           Atualizado em {formatDate(item.updatedAt)}
         </Text>
       </View>
@@ -113,8 +118,8 @@ function StatusCard({ item, onOpenJARIModal }: StatusCardProps) {
           onPress={() => onOpenJARIModal(item)}
           className="mt-4 rounded-xl border border-amber-400/50 bg-amber-400/10 py-3 flex-row items-center justify-center gap-2 active:opacity-90"
         >
-          <Ionicons name="document-text-outline" size={18} color="#fbbf24" />
-          <Text className="text-sm font-semibold text-amber-400">
+          <Ionicons name="document-text-outline" size={18} color="#f59e0b" />
+          <Text className="text-sm font-semibold text-amber-500">
             {hasRecurso ? 'Ver / editar recurso à JARI' : 'Gerar recurso à JARI'}
           </Text>
         </Pressable>
@@ -128,6 +133,9 @@ export default function StatusScreen() {
   const { items, isLoaded, refresh, markAsRead, updateStatus, deleteStatus } =
     useStatusMultas();
   const { profile } = useTechnicalProfile();
+  const { plan, isActive } = useSubscription();
+  const tc = useThemeClasses();
+  const canUseJARI = isActive && plan === 'monthly';
   const [selectedJARIItem, setSelectedJARIItem] = useState<StatusMultaEnviada | null>(null);
   const [isSavingJARI, setIsSavingJARI] = useState(false);
   const [saveFeedback, setSaveFeedback] = useState(false);
@@ -204,20 +212,17 @@ export default function StatusScreen() {
   }
 
   return (
-    <View className="flex-1 bg-slate-900">
-      <StatusBar style="light" />
+    <View className={`flex-1 ${tc.screen}`}>
+      <StatusBar style={tc.statusBar} />
 
-      <LinearGradient colors={['#0f172a', '#1e293b']} style={{ flex: 1 }}>
+      <LinearGradient colors={[...tc.screenGradient]} style={{ flex: 1 }}>
         <SafeAreaView edges={['top']} style={{ flex: 1 }}>
           <View className="w-[90%] self-center pt-4 pb-6">
-            <Text className="text-white text-xl font-semibold">
-              Status das multas enviadas
+            <Text className={`${tc.text} text-xl font-semibold`}>
+              Status das multas
             </Text>
-            <Text className="text-slate-400 text-sm mt-2">
-              Acompanhe aqui as atualizações das defesas que você enviou ao órgão competente.
-            </Text>
-            <Text className="text-slate-500 text-xs mt-1">
-              Os prazos e o andamento dependem do órgão autuador. Consulte o protocolo quando disponível.
+            <Text className={`${tc.textMuted} text-sm mt-2`}>
+              Veja o andamento das defesas enviadas.
             </Text>
             {__DEV__ && (
               <Pressable
@@ -225,7 +230,7 @@ export default function StatusScreen() {
                 disabled={isLoadingSamples}
                 className="mt-4 rounded-xl border border-amber-400/50 bg-amber-400/10 py-3 active:opacity-90"
               >
-                <Text className="text-center text-sm font-semibold text-amber-400">
+                <Text className="text-center text-sm font-semibold text-amber-500">
                   {isLoadingSamples ? 'Carregando…' : 'Carregar exemplos de status (indeferido)'}
                 </Text>
               </Pressable>
@@ -234,17 +239,17 @@ export default function StatusScreen() {
 
           {!isLoaded ? (
             <View className="flex-1 items-center justify-center">
-              <Text className="text-slate-500 text-sm">Carregando…</Text>
+              <Text className={`${tc.textSubtle} text-sm`}>Carregando…</Text>
             </View>
           ) : items.length === 0 ? (
             <View className="flex-1 items-center justify-center px-8">
-              <View className="h-16 w-16 rounded-full bg-slate-800 border border-slate-700 items-center justify-center mb-4">
-                <Ionicons name="send-outline" size={28} color="#64748b" />
+              <View className={`h-16 w-16 rounded-full items-center justify-center mb-4 border ${tc.buttonSecondary}`}>
+                <Ionicons name="send-outline" size={28} color={tc.iconMuted} />
               </View>
-              <Text className="text-white text-base font-semibold text-center">
+              <Text className={`${tc.text} text-base font-semibold text-center`}>
                 Nenhuma multa enviada ainda
               </Text>
-              <Text className="text-slate-400 text-sm text-center mt-2 leading-relaxed">
+              <Text className={`${tc.textMuted} text-sm text-center mt-2 leading-relaxed`}>
                 Quando você compartilhar uma defesa pela aba Defesas, ela aparecerá aqui para acompanhamento de status.
               </Text>
             </View>
@@ -259,6 +264,7 @@ export default function StatusScreen() {
                   key={item.id}
                   item={item}
                   onOpenJARIModal={setSelectedJARIItem}
+                    canUseJARI={canUseJARI}
                 />
               ))}
             </ScrollView>

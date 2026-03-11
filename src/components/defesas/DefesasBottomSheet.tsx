@@ -1,11 +1,10 @@
 import React from 'react';
-import { View, Text, ScrollView, Dimensions } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+import { useThemeClasses } from '../../context/ThemeContext';
 import { AnalyzedInfractionRecord } from './types';
 import DefenseCard from './DefenseCard';
-
-const SHEET_HEIGHT = Math.round(Dimensions.get('window').height * 0.7);
 
 type Props = {
   records: AnalyzedInfractionRecord[];
@@ -15,39 +14,40 @@ type Props = {
 };
 
 export default function DefesasBottomSheet({ records, onView, onSend, onDelete }: Props) {
+  const tc = useThemeClasses();
+
   return (
-    <View className="flex-1 justify-end">
+    <View className="flex-1 mt-4">
       <View
-        className="rounded-t-3xl border border-slate-800 bg-slate-900 px-6 pt-5 pb-6"
-        style={{ height: SHEET_HEIGHT }}
+        className={`flex-1 rounded-t-3xl px-6 pt-5 pb-6 ${tc.modalBg} ${tc.border}`}
       >
         <View className="items-center">
-          <View className="h-1.5 w-14 rounded-full bg-slate-700" />
+          <View className={`h-1.5 w-14 rounded-full ${tc.divider}`} />
         </View>
 
         <View className="mt-4 flex-row items-center justify-between">
           <View className="flex-1 pr-4">
-            <Text className="text-white text-base font-semibold">
+            <Text className={`${tc.text} text-base font-semibold`}>
               Histórico de defesas
             </Text>
-            <Text className="text-slate-400 text-xs mt-1">
+            <Text className={`${tc.textMuted} text-xs mt-1`}>
               Infrações com inconsistências técnicas detectadas
             </Text>
           </View>
 
-          <View className="h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900">
-            <Ionicons name="shield" size={18} color="#fbbf24" />
+          <View className={`h-10 w-10 items-center justify-center rounded-xl border ${tc.buttonSecondary}`}>
+            <Ionicons name="shield" size={18} color="#f59e0b" />
           </View>
         </View>
 
-        <View className="mt-4 flex-1">
+        <View className="mt-4" style={{ flexGrow: 1 }}>
           {records.length === 0 ? (
             <View className="flex-1 items-center justify-center">
               <Ionicons name="shield-checkmark" size={28} color="#22c55e" />
-              <Text className="text-white mt-3 font-semibold">
+              <Text className={`${tc.text} mt-3 font-semibold`}>
                 Nenhuma defesa registrada
               </Text>
-              <Text className="text-slate-400 text-center mt-1 text-sm">
+              <Text className={`${tc.textMuted} text-center mt-1 text-sm`}>
                 Análises com inconsistências aparecerão aqui.
               </Text>
             </View>

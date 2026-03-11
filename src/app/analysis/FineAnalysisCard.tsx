@@ -1,5 +1,7 @@
 import { View, Text, Pressable } from 'react-native';
 
+import { useThemeClasses } from '../../context/ThemeContext';
+
 interface FineAnalysisCardProps {
   onStartAnalysis: () => void;
 }
@@ -7,15 +9,16 @@ interface FineAnalysisCardProps {
 export default function FineAnalysisCard({
   onStartAnalysis,
 }: FineAnalysisCardProps) {
+  const tc = useThemeClasses();
+
   return (
-    <View className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 px-5 py-5">
-      <Text className="text-sm font-semibold text-white">
+    <View className={`mt-6 rounded-2xl px-5 py-5 ${tc.cardAlt}`}>
+      <Text className={`text-sm font-semibold ${tc.text}`}>
         Análise técnica de multa
       </Text>
 
-      <Text className="mt-1 text-sm text-slate-500 leading-relaxed">
-        Informe manualmente os dados da multa para
-        executar uma análise técnica formal.
+      <Text className={`mt-1 text-sm leading-relaxed ${tc.textSubtle}`}>
+        Informe os dados da multa para gerar o parecer técnico.
       </Text>
 
       <Pressable
@@ -27,9 +30,8 @@ export default function FineAnalysisCard({
         </Text>
       </Pressable>
 
-      <Text className="mt-3 text-center text-[10px] leading-relaxed text-slate-600">
-        A análise não garante êxito administrativo
-        ou jurídico.
+      <Text className={`mt-3 text-center text-[10px] leading-relaxed ${tc.textSubtle}`}>
+        A análise não garante resultado administrativo ou judicial.
       </Text>
     </View>
   );

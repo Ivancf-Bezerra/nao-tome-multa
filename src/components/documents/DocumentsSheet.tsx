@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
-import { LinearGradient } from 'expo-linear-gradient';
+import {
+  View,
+  Text,
+  Pressable,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import {
@@ -11,6 +16,10 @@ import {
   type DriverProfile,
   type VehicleProfile,
 } from '../../context/TechnicalProfileContext';
+import { useThemeClasses } from '../../context/ThemeContext';
+
+const SCREEN_HEIGHT = Dimensions.get('window').height;
+const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.8;
 
 const EMPTY_DRIVER: DriverProfile = {
   fullName: '',
@@ -53,8 +62,13 @@ const AUTO_VEHICLE_FROM_DOCUMENT: VehicleProfile = {
   ownerCpf: '00000000000',
 };
 
-export default function DocumentosScreen() {
+type Props = {
+  onClose: () => void;
+};
+
+export default function DocumentsSheet({ onClose }: Props) {
   const { profile, saveProfile } = useTechnicalProfile();
+  const tc = useThemeClasses();
   const [isApplyingDriver, setIsApplyingDriver] = useState(false);
   const [isApplyingVehicle, setIsApplyingVehicle] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -121,34 +135,58 @@ export default function DocumentosScreen() {
   const hasVehicle = Boolean(profile?.vehicle?.plate);
 
   return (
-    <View className="flex-1 bg-slate-900">
-      <StatusBar style="light" />
+    <View
+      className={`rounded-t-3xl border-t ${tc.modalBg} ${tc.border}`}
+      style={{ maxHeight: SHEET_MAX_HEIGHT }}
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ maxHeight: '100%' }}
+      >
+        <ScrollView
+          contentContainerStyle={{
+            paddingHorizontal: 24,
+            paddingTop: 16,
+            paddingBottom: 24,
+          }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={true}
+          bounces={false}
+        >
+          {/* HEADER */}
+          <View className={`pb-4 ${tc.borderB}`}>
+            <View className={`mb-3 h-1 w-10 self-center rounded-full ${tc.divider}`} />
 
-      <LinearGradient colors={['#0f172a', '#1e293b']} style={{ flex: 1 }}>
-        <SafeAreaView edges={['top']} style={{ flex: 1 }}>
-          <View className="w-[90%] self-center pt-4 pb-6">
-            <Text className="text-white text-xl font-semibold">
-              Documentos
-            </Text>
-            <Text className="text-slate-400 text-sm mt-2">
-              Use os documentos físicos para preencher automaticamente os dados
-              do condutor e do veículo. A leitura da multa será adicionada em uma
-              etapa futura.
+            <View className="flex-row items-center justify-between">
+              <Text className={`text-base font-semibold ${tc.text}`}>
+                Preenchimento com documentos
+              </Text>
+
+              <Pressable onPress={onClose}>
+                <Text className={`text-sm ${tc.textSubtle}`}>
+                  Cancelar
+                </Text>
+              </Pressable>
+            </View>
+
+            <Text className={`mt-1 text-sm ${tc.textSubtle}`}>
+              Use a CNH e o documento do veículo para preencher ou atualizar o cadastro técnico.
             </Text>
           </View>
 
-          <View className="flex-1 px-6 pb-6">
+          {/* CONTEÚDO */}
+          <View className="pt-2">
             {/* CARD CNH */}
-            <View className="mb-4 rounded-2xl border border-slate-800 bg-slate-800/80 p-4">
+            <View className={`mb-4 rounded-2xl p-4 ${tc.cardAlt}`}>
               <View className="flex-row items-center mb-3">
                 <View className="h-10 w-10 rounded-full bg-emerald-500/10 border border-emerald-400/40 items-center justify-center mr-3">
                   <Ionicons name="id-card-outline" size={20} color="#6ee7b7" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-white font-semibold text-base">
+                  <Text className={`font-semibold text-base ${tc.text}`}>
                     CNH — dados do condutor
                   </Text>
-                  <Text className="text-slate-400 text-xs mt-0.5">
+                  <Text className={`${tc.textMuted} text-xs mt-0.5`}>
                     Leia as informações da CNH para preencher automaticamente nome,
                     CPF, CNH, categoria e validade.
                   </Text>
@@ -177,22 +215,22 @@ export default function DocumentosScreen() {
                   className="text-sm font-semibold"
                   style={{ color: isApplyingDriver ? '#9ca3af' : '#022c22' }}
                 >
-                  {isApplyingDriver ? 'Aplicando preenchimento…' : 'Preencher automaticamente com CNH'}
+                  {isApplyingDriver ? 'Aplicando…' : 'Usar CNH'}
                 </Text>
               </Pressable>
             </View>
 
             {/* CARD VEÍCULO */}
-            <View className="mb-4 rounded-2xl border border-slate-800 bg-slate-800/80 p-4">
+            <View className={`mb-4 rounded-2xl p-4 ${tc.cardAlt}`}>
               <View className="flex-row items-center mb-3">
                 <View className="h-10 w-10 rounded-full bg-sky-500/10 border border-sky-400/40 items-center justify-center mr-3">
-                  <Ionicons name="car-outline" size={20} color="#7dd3fc" />
+                  <Ionicons name="car-outline" size={20} color="#0ea5e9" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-white font-semibold text-base">
+                  <Text className={`font-semibold text-base ${tc.text}`}>
                     Documento do veículo
                   </Text>
-                  <Text className="text-slate-400 text-xs mt-0.5">
+                  <Text className={`${tc.textMuted} text-xs mt-0.5`}>
                     Use o CRLV/CRV para preencher placa, RENAVAM, marca, modelo,
                     município, UF e CPF do proprietário.
                   </Text>
@@ -221,7 +259,7 @@ export default function DocumentosScreen() {
                   className="text-sm font-semibold"
                   style={{ color: isApplyingVehicle ? '#9ca3af' : '#0f172a' }}
                 >
-                  {isApplyingVehicle ? 'Aplicando preenchimento…' : 'Preencher automaticamente com documento do veículo'}
+                  {isApplyingVehicle ? 'Aplicando…' : 'Usar doc. do veículo'}
                 </Text>
               </Pressable>
             </View>
@@ -229,12 +267,12 @@ export default function DocumentosScreen() {
             {/* INFO SOBRE MULTA (futuro) */}
             <View className="mt-2 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4">
               <View className="flex-row items-center mb-1.5">
-                <Ionicons name="information-circle-outline" size={16} color="#fbbf24" />
-                <Text className="text-amber-300 text-xs font-semibold ml-2">
+                <Ionicons name="information-circle-outline" size={16} color="#f59e0b" />
+                <Text className="text-amber-600 text-xs font-semibold ml-2">
                   Leitura da multa
                 </Text>
               </View>
-              <Text className="text-amber-100/80 text-xs leading-relaxed">
+              <Text className="text-amber-700/90 text-xs leading-relaxed">
                 A raspagem automática dos dados da multa (AIT/RENAINF) será adicionada em
                 uma próxima versão. Por enquanto, você pode informar a multa normalmente
                 pela tela de Análise na aba Início.
@@ -247,8 +285,8 @@ export default function DocumentosScreen() {
               </View>
             )}
           </View>
-        </SafeAreaView>
-      </LinearGradient>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }

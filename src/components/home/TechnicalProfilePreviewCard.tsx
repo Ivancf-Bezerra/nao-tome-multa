@@ -1,9 +1,10 @@
-import { View, Text, Pressable } from 'react-native';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { Pressable, Text, View } from 'react-native';
 
-import CardContainer from '../ui/CardContainer';
 import { useTechnicalProfile } from '../../context/TechnicalProfileContext';
+import { useThemeClasses } from '../../context/ThemeContext';
+import CardContainer from '../ui/CardContainer';
 
 interface TechnicalProfilePreviewCardProps {
   onDeleteProfile: () => void;
@@ -17,13 +18,15 @@ export default function TechnicalProfilePreviewCard({
 
   if (!profile) return null;
 
+  const tc = useThemeClasses();
+
   return (
     <CardContainer>
       {/* HEADER */}
-      <View className="flex-row items-center justify-between mb-4 border-b border-slate-800/50 pb-3">
+      <View className={`flex-row items-center justify-between mb-4 pb-3 ${tc.borderB}`}>
         <View className="flex-row items-center gap-2">
-          <Ionicons name="shield-checkmark-outline" size={14} color="#fbbf24" />
-          <Text className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+          <Ionicons name="shield-checkmark-outline" size={14} color="#f59e0b" />
+          <Text className={`text-[10px] font-bold uppercase tracking-widest ${tc.textSubtle}`}>
             Identidade Técnica
           </Text>
         </View>
@@ -78,13 +81,13 @@ export default function TechnicalProfilePreviewCard({
           </View>
 
           <View className="items-end">
-            <View className="bg-slate-800 border border-slate-700 px-2 py-1 rounded mb-1.5">
-              <Text className="text-[10px] text-slate-300 font-bold mb-1">
+            <View className={`px-2 py-1 rounded mb-1.5 border ${tc.buttonSecondary}`}>
+              <Text className={`text-[10px] font-bold mb-1 ${tc.buttonSecondaryText}`}>
                 CNH {profile.driver.cnhCategory}
               </Text>
             </View>
 
-            <Text className="text-[9px] text-slate-500">
+            <Text className={`text-[9px] ${tc.textSubtle}`}>
               Vence em {profile.driver.cnhExpiry}
             </Text>
           </View>
@@ -92,14 +95,14 @@ export default function TechnicalProfilePreviewCard({
       </View>
 
       {/* BLOCO 2: VEÍCULO */}
-      <View className="bg-slate-900/80 rounded-lg p-4 border border-slate-800 flex-row items-center gap-4">
-        <View className="h-10 w-10 items-center justify-center rounded bg-slate-800 border border-slate-700/50">
-          <Ionicons name="car-sport" size={18} color="#94a3b8" />
+      <View className={`rounded-lg p-4 flex-row items-center gap-4 ${tc.cardAlt}`}>
+        <View className={`h-10 w-10 items-center justify-center rounded border ${tc.buttonSecondary}`}>
+          <Ionicons name="car-sport" size={18} color={tc.iconMuted} />
         </View>
 
         <View className="flex-1 justify-center">
           <Text
-            className="text-sm font-semibold text-slate-200 leading-tight mb-1"
+            className={`text-sm font-semibold leading-tight mb-1 ${tc.buttonSecondaryText}`}
             numberOfLines={1}
           >
             {profile.vehicle.model}
@@ -110,10 +113,10 @@ export default function TechnicalProfilePreviewCard({
               {profile.vehicle.color || 'COR N/D'}
             </Text>
 
-            <View className="h-0.5 w-0.5 rounded-full bg-slate-600" />
+            <View className={`h-0.5 w-0.5 rounded-full ${tc.divider}`} />
 
             <Text
-              className="text-[10px] text-slate-500 flex-1"
+              className={`text-[10px] flex-1 ${tc.textSubtle}`}
               numberOfLines={1}
             >
               {profile.vehicle.city}
@@ -121,7 +124,7 @@ export default function TechnicalProfilePreviewCard({
           </View>
         </View>
 
-        <View className="bg-black/60 border border-slate-700 px-3 py-2 rounded ml-1 shadow-sm">
+        <View className={`border px-3 py-2 rounded ml-1 shadow-sm ${tc.buttonSecondary}`}>
           <Text className="font-mono text-sm font-bold text-amber-500 tracking-[2px]">
             {profile.vehicle.plate}
           </Text>

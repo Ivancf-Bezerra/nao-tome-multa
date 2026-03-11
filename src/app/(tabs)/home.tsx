@@ -1,10 +1,11 @@
-import { View, Text, Pressable, Modal, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, Pressable, Modal, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useUser } from '@clerk/clerk-expo';
+import { Ionicons } from '@expo/vector-icons';
 
 import HomeHeader from '../../components/home/HomeHeader';
 import WelcomeMessage from '../../components/home/WelcomeMessage';
@@ -18,10 +19,12 @@ import SubscriptionBanner from '../../components/subscription/SubscriptionBanner
 import { useTechnicalProfile } from '../../context/TechnicalProfileContext';
 import { useSubscription } from '../../context/SubscriptionContext';
 import { useStatusMultas } from '../../context/StatusMultasContext';
+import { useThemeClasses } from '../../context/ThemeContext';
 import { useInfractionSearch } from '../../services/infractions/useInfractionSearch';
 import { addDefesa } from '../../components/defesas/storage';
 import { AnalyzedInfractionRecord } from '../../components/defesas/types';
 import { SAMPLE_INFRACTION_INPUT } from '../../data/infractions/sampleInfractionInput';
+import DocumentsSheet from '../../components/documents/DocumentsSheet';
 
 const EMPTY_FORM: InfractionFormData = {
   aitNumber: '',
@@ -48,6 +51,7 @@ export default function Home() {
   const router = useRouter();
   const { user } = useUser();
   const { profile, clearProfile } = useTechnicalProfile();
+  const tc = useThemeClasses();
   const { isActive } = useSubscription();
   const { items: statusItems, lastReadAt, unreadCount: statusUnreadCount } = useStatusMultas();
   const unreadStatusItems =
@@ -61,6 +65,7 @@ export default function Home() {
   const [isDeletingProfile, setIsDeletingProfile] = useState(false);
   const [feedbackVisible, setFeedbackVisible] = useState(false);
   const [infractionModalOpen, setInfractionModalOpen] = useState(false);
+  const [documentsModalOpen, setDocumentsModalOpen] = useState(false);
   const [infractionForm, setInfractionForm] = useState<InfractionFormData>(INITIAL_FORM);
 
   const hasTechnicalProfile = Boolean(profile);
@@ -109,14 +114,37 @@ export default function Home() {
   }
 
   function handleStartAnalysis() {
+    if (!hasTechnicalProfile) {
+      Alert.alert(
+        'Cadastre seus dados primeiro',
+        'Para analisar uma multa, você precisa cadastrar os dados do condutor e do veículo. Toque em "Cadastro técnico" na tela inicial para preencher as informações conforme os documentos oficiais.',
+      );
+      return;
+    }
+
+    if (!isActive) {
+      Alert.alert(
+        'Recurso disponível no plano pago',
+        'A análise técnica de multas e a geração automática de defesas estão disponíveis apenas para assinantes. Ative um plano para continuar.',
+        [
+          { text: 'Agora não', style: 'cancel' },
+          {
+            text: 'Ver planos',
+            onPress: () => router.push('/subscription/plans'),
+          },
+        ],
+      );
+      return;
+    }
+
     startManualAnalysis(infractionForm);
   }
 
   return (
-    <View className="flex-1 bg-slate-900">
-      <StatusBar style="light" />
+    <View className={`flex-1 ${tc.screen}`}>
+      <StatusBar style={tc.statusBar} />
 
-      <LinearGradient colors={['#0f172a', '#1e293b']} style={{ flex: 1 }}>
+      <LinearGradient colors={[...tc.screenGradient]} style={{ flex: 1 }}>
         <SafeAreaView edges={['top']} style={{ flex: 1 }}>
           <HomeHeader
             onOpenNotifications={() => setNotificationsOpen(true)}
@@ -127,6 +155,23 @@ export default function Home() {
           <WelcomeMessage />
 
           <View className="w-[90%] self-center">
+            <Pressable
+              onPress={() => setDocumentsModalOpen(true)}
+              className={`mb-4 rounded-2xl border-2 border-amber-400/70 px-4 py-3 flex-row items-center active:opacity-90 ${tc.cardAlt}`}
+            >
+              <View className="flex-1 pr-3">
+                <Text className="text-[11px] font-semibold uppercase tracking-widest text-amber-500">
+                  Preenchimento com documentos
+                </Text>
+                <Text className={`${tc.textMuted} text-xs mt-1 leading-5`}>
+                  Use a CNH e o documento do veículo para preencher ou atualizar o cadastro técnico.
+                </Text>
+              </View>
+              <View className="h-9 w-9 items-center justify-center rounded-full bg-amber-400/10 border border-amber-400/40">
+                <Ionicons name="scan-outline" size={18} color="#f59e0b" />
+              </View>
+            </Pressable>
+
             {!hasTechnicalProfile && (
               <TechnicalProfileCard
                 onPress={() => router.push('/profile/TechnicalProfileScreen')}
@@ -152,6 +197,23 @@ export default function Home() {
         </SafeAreaView>
       </LinearGradient>
 
+      {/* MODAL DOCUMENTOS */}
+      <Modal
+        visible={documentsModalOpen}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setDocumentsModalOpen(false)}
+      >
+        <View className="flex-1 justify-end bg-black/60">
+          <Pressable
+            className="absolute inset-0"
+            onPress={() => setDocumentsModalOpen(false)}
+          />
+
+          <DocumentsSheet onClose={() => setDocumentsModalOpen(false)} />
+        </View>
+      </Modal>
+
       {/* MODAL DA MULTA */}
       <Modal
         visible={infractionModalOpen}
@@ -165,7 +227,7 @@ export default function Home() {
             onPress={() => setInfractionModalOpen(false)}
           />
 
-          <View className="rounded-t-3xl border-t border-slate-800 bg-slate-900 max-h-[90%]">
+          <View className={`rounded-t-3xl border-t max-h-[90%] ${tc.modalBg} ${tc.border}`}>
             <KeyboardAvoidingView
               behavior={Platform.OS === 'ios' ? 'padding' : undefined}
               style={{ maxHeight: '100%' }}
@@ -176,8 +238,8 @@ export default function Home() {
                 keyboardShouldPersistTaps="handled"
                 bounces={false}
               >
-                <View className="mb-4 h-1 w-10 self-center rounded-full bg-slate-700" />
-                <Text className="text-base font-semibold text-white">
+                <View className={`mb-4 h-1 w-10 self-center rounded-full ${tc.divider}`} />
+                <Text className={`text-base font-semibold ${tc.text}`}>
                   Dados da multa
                 </Text>
 
@@ -217,11 +279,11 @@ export default function Home() {
         }}
       >
         <View className="flex-1 bg-black/70 items-center justify-center px-6">
-          <View className="w-full max-w-[420px] rounded-2xl border border-slate-800 bg-slate-900 p-5">
-            <Text className="text-white text-base font-semibold">
+          <View className={`w-full max-w-[420px] rounded-2xl border p-5 ${tc.modalBg} ${tc.border}`}>
+            <Text className={`${tc.text} text-base font-semibold`}>
               Excluir cadastro técnico
             </Text>
-            <Text className="text-slate-400 text-sm mt-2 leading-5">
+            <Text className={`${tc.textMuted} text-sm mt-2 leading-5`}>
               Isso remove os dados do condutor e do veículo salvos neste dispositivo.
               Você poderá cadastrar novamente depois.
             </Text>
@@ -230,9 +292,9 @@ export default function Home() {
               <Pressable
                 disabled={isDeletingProfile}
                 onPress={() => setConfirmDeleteOpen(false)}
-                className="flex-1 rounded-xl py-3 border border-slate-700 bg-slate-800 active:opacity-70"
+                className={`flex-1 rounded-xl py-3 border active:opacity-70 ${tc.buttonSecondary}`}
               >
-                <Text className="text-center text-sm font-semibold text-slate-200">
+                <Text className={`text-center text-sm font-semibold ${tc.buttonSecondaryText}`}>
                   Cancelar
                 </Text>
               </Pressable>
@@ -260,9 +322,9 @@ export default function Home() {
       {/* FEEDBACK DISCRETO */}
       <Modal visible={feedbackVisible} transparent animationType="fade">
         <View className="flex-1 items-center justify-center bg-black/70 px-6">
-          <View className="rounded-2xl border border-slate-800 bg-slate-900 px-5 py-4">
-            <Text className="text-white text-sm font-semibold">Cadastro removido</Text>
-            <Text className="text-slate-400 text-xs mt-1">
+          <View className={`rounded-2xl border px-5 py-4 ${tc.modalBg} ${tc.border}`}>
+            <Text className={`${tc.text} text-sm font-semibold`}>Cadastro removido</Text>
+            <Text className={`${tc.textMuted} text-xs mt-1`}>
               Dados técnicos foram limpos deste dispositivo.
             </Text>
           </View>

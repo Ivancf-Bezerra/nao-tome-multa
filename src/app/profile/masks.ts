@@ -25,3 +25,4 @@ export function formatPlate(value: string) {
     .replace(/[^A-Z0-9]/g, '')
     .slice(0, 7);
 }
+

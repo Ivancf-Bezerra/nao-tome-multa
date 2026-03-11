@@ -1,8 +1,10 @@
-import { Modal, View, Text, Pressable, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+
+import { useThemeClasses } from '../../context/ThemeContext';
 import type {
-  StatusMultaEnviada,
-  StatusMultaEnviadaCode,
+    StatusMultaEnviada,
+    StatusMultaEnviadaCode,
 } from '../../data/status/types';
 import { STATUS_LABELS } from '../../data/status/types';
 
@@ -50,6 +52,7 @@ export default function NotificationsModal({
   unreadItems = [],
 }: NotificationsModalProps) {
   const router = useRouter();
+  const tc = useThemeClasses();
 
   function handleClose() {
     onClose();
@@ -63,16 +66,16 @@ export default function NotificationsModal({
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View className="flex-1 bg-black/50 justify-center items-center px-6">
-        <View className="w-full max-w-md bg-slate-800 rounded-2xl px-6 pt-6 pb-5 max-h-[80%]">
-          <Text className="text-base font-semibold text-white">
+        <View className={`w-full max-w-md rounded-2xl px-6 pt-6 pb-5 max-h-[80%] ${tc.modalBg} ${tc.border}`}>
+          <Text className={`text-base font-semibold ${tc.text}`}>
             Atualizações recentes
           </Text>
-          <Text className="text-slate-500 text-xs mt-1">
+          <Text className={`${tc.textSubtle} text-xs mt-1`}>
             Status das multas enviadas
           </Text>
 
           {unreadItems.length === 0 ? (
-            <Text className="mt-3 text-sm text-slate-400 leading-relaxed">
+            <Text className={`mt-3 text-sm leading-relaxed ${tc.textMuted}`}>
               Nenhuma atualização recente no momento.
             </Text>
           ) : (
@@ -83,27 +86,27 @@ export default function NotificationsModal({
               {unreadItems.slice(0, 10).map((item) => (
                 <View
                   key={item.id}
-                  className="mb-3 rounded-xl border border-slate-700 bg-slate-900/80 p-3"
+                  className={`mb-3 rounded-xl p-3 ${tc.cardAlt}`}
                 >
-                  <Text className="text-amber-400 text-xs font-semibold uppercase tracking-wide">
+                  <Text className="text-amber-500 text-xs font-semibold uppercase tracking-wide">
                     {getNotificationTitle(item.status)}
                   </Text>
-                  <Text className="text-white font-semibold text-sm mt-1.5">
+                  <Text className={`font-semibold text-sm mt-1.5 ${tc.text}`}>
                     AIT #{item.aitNumber}
                   </Text>
                   {item.description ? (
                     <Text
-                      className="text-slate-400 text-xs mt-0.5"
+                      className={`${tc.textMuted} text-xs mt-0.5`}
                       numberOfLines={1}
                     >
                       {item.description}
                     </Text>
                   ) : null}
                   <View className="flex-row items-center justify-between mt-2">
-                    <Text className="text-slate-400 text-xs font-medium">
+                    <Text className={`${tc.textMuted} text-xs font-medium`}>
                       {STATUS_LABELS[item.status]}
                     </Text>
-                    <Text className="text-slate-500 text-[10px]">
+                    <Text className={`${tc.textSubtle} text-[10px]`}>
                       {formatDateShort(item.updatedAt)}
                     </Text>
                   </View>
@@ -117,12 +120,12 @@ export default function NotificationsModal({
               onPress={handleGoToStatus}
               className="rounded-xl border border-amber-400/50 bg-amber-400/10 py-2.5 px-4"
             >
-              <Text className="text-amber-400 text-sm font-semibold">
+              <Text className="text-amber-500 text-sm font-semibold">
                 Ver aba Status
               </Text>
             </Pressable>
             <Pressable onPress={handleClose}>
-              <Text className="text-sm font-medium text-slate-400">Fechar</Text>
+              <Text className={`text-sm font-medium ${tc.textMuted}`}>Fechar</Text>
             </Pressable>
           </View>
         </View>

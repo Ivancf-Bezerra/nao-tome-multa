@@ -1,19 +1,24 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
+import { useTheme } from '../../context/ThemeContext';
+
 export default function TabLayout() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#0f172a',
-          borderTopColor: '#1e293b',
+          backgroundColor: isDark ? '#0f172a' : '#ffffff',
+          borderTopColor: isDark ? '#1e293b' : '#e2e8f0',
           borderTopWidth: 1,
           height: 64,
         },
-        tabBarActiveTintColor: '#ffffff',
-        tabBarInactiveTintColor: '#94a3b8',
+        tabBarActiveTintColor: isDark ? '#ffffff' : '#0f172a',
+        tabBarInactiveTintColor: isDark ? '#94a3b8' : '#64748b',
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',
@@ -29,20 +34,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'home' : 'home-outline'}
-              size={20}
-              color={color}
-            />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="documentos"
-        options={{
-          title: 'Documentos',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? 'scan' : 'scan-outline'}
               size={20}
               color={color}
             />
@@ -71,6 +62,20 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'document-text' : 'document-text-outline'}
+              size={20}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="planos"
+        options={{
+          title: 'Planos',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? 'pricetag' : 'pricetag-outline'}
               size={20}
               color={color}
             />
