@@ -3,15 +3,17 @@ import {
   ClerkProvider,
   ClerkLoaded,
   useAuth,
+  useUser,
 } from '@clerk/clerk-expo';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
 
 import { TechnicalProfileProvider } from '../context/TechnicalProfileContext';
+import { SubscriptionProvider } from '../context/SubscriptionContext';
+import { StatusMultasProvider } from '../context/StatusMultasContext';
 
-const publishableKey =
-  process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
 if (!publishableKey) {
   throw new Error(
@@ -36,6 +38,8 @@ const tokenCache = {
 
 function AuthGate() {
   const { isSignedIn, isLoaded } = useAuth();
+  const { user } = useUser();
+
   const segments = useSegments();
   const router = useRouter();
 
@@ -43,9 +47,15 @@ function AuthGate() {
     if (!isLoaded) return;
 
     const rootSegment = segments[0];
+
     const inAuthGroup = rootSegment === 'auth';
     const inTabsGroup = rootSegment === '(tabs)';
     const inProfileGroup = rootSegment === 'profile';
+    const inSubscriptionGroup = rootSegment === 'subscription';
+
+    const isSettings = rootSegment === 'settings';
+    const isLegal = rootSegment === 'legal';
+
     const isSplash = rootSegment === undefined;
 
     if (!isSignedIn) {
@@ -56,25 +66,34 @@ function AuthGate() {
     }
 
     if (isSignedIn) {
-      if (!inTabsGroup && !inProfileGroup && !isSplash) {
+      const isAllowed =
+        inTabsGroup ||
+        inProfileGroup ||
+        inSubscriptionGroup ||
+        isSettings ||
+        isLegal ||
+        isSplash;
+
+      if (!isAllowed) {
         router.replace('/(tabs)/home');
       }
     }
   }, [isSignedIn, isLoaded, segments]);
 
   return (
-    <TechnicalProfileProvider>
-      <Slot />
+    <TechnicalProfileProvider key={user?.id ?? 'guest'}>
+      <SubscriptionProvider>
+        <StatusMultasProvider>
+          <Slot />
+        </StatusMultasProvider>
+      </SubscriptionProvider>
     </TechnicalProfileProvider>
   );
 }
 
 export default function RootLayout() {
   return (
-    <ClerkProvider
-      publishableKey={publishableKey}
-      tokenCache={tokenCache}
-    >
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
       <ClerkLoaded>
         <AuthGate />
       </ClerkLoaded>

@@ -6,6 +6,7 @@ import {
   ReactNode,
 } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import { useUser } from '@clerk/clerk-expo';
 
 /* =======================
    TIPOS DE DOMÍNIO
@@ -49,11 +50,21 @@ interface TechnicalProfileContextData {
 }
 
 const TechnicalProfileContext =
-  createContext<TechnicalProfileContextData | undefined>(
-    undefined,
-  );
+  createContext<TechnicalProfileContextData | undefined>(undefined);
 
-const STORAGE_KEY = 'technical_profile_v3';
+/* =======================
+   STORAGE (POR USUÁRIO)
+======================= */
+
+function safeKeyPart(value: string) {
+  return value.replace(/[^a-zA-Z0-9._-]/g, '_');
+}
+
+function getStorageKey(userId: string) {
+  return `technical_profile_v3_${safeKeyPart(userId)}`;
+}
+
+
 
 /* =======================
    PROVIDER
@@ -64,17 +75,31 @@ export function TechnicalProfileProvider({
 }: {
   children: ReactNode;
 }) {
-  const [profile, setProfile] =
-    useState<TechnicalProfile | null>(null);
+  const { user, isLoaded: isUserLoaded } = useUser();
+  const userId = user?.id ?? null;
+
+  const [profile, setProfile] = useState<TechnicalProfile | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     async function loadProfile() {
-      try {
-        const stored =
-          await SecureStore.getItemAsync(STORAGE_KEY);
+      // 🔒 Se não tem usuário, não tem perfil carregado
+      if (!userId) {
+        setProfile(null);
+        setIsLoaded(true);
+        return;
+      }
 
-        if (!stored) return;
+      setIsLoaded(false);
+
+      try {
+        const storageKey = getStorageKey(userId);
+        const stored = await SecureStore.getItemAsync(storageKey);
+
+        if (!stored) {
+          setProfile(null);
+          return;
+        }
 
         const parsed = JSON.parse(stored);
 
@@ -85,58 +110,72 @@ export function TechnicalProfileProvider({
          * - nunca undefined
          */
         const normalized: TechnicalProfile = {
-          createdAt:
-            parsed.createdAt ??
-            new Date().toISOString(),
+          createdAt: parsed.createdAt ?? new Date().toISOString(),
 
           driver: {
             fullName: parsed.driver?.fullName ?? '',
             cpf: parsed.driver?.cpf ?? '',
             cnhNumber: parsed.driver?.cnhNumber ?? '',
-            cnhCategory:
-              parsed.driver?.cnhCategory ?? '',
-            cnhExpiry:
-              parsed.driver?.cnhExpiry ?? '',
-            cnhIssuerUF:
-              parsed.driver?.cnhIssuerUF ?? '',
+            cnhCategory: parsed.driver?.cnhCategory ?? '',
+            cnhExpiry: parsed.driver?.cnhExpiry ?? '',
+            cnhIssuerUF: parsed.driver?.cnhIssuerUF ?? '',
           },
 
           vehicle: {
             plate: parsed.vehicle?.plate ?? '',
-            renavam:
-              parsed.vehicle?.renavam ?? '',
+            renavam: parsed.vehicle?.renavam ?? '',
             brand: parsed.vehicle?.brand ?? '',
             model: parsed.vehicle?.model ?? '',
             color: parsed.vehicle?.color ?? '',
             city: parsed.vehicle?.city ?? '',
             uf: parsed.vehicle?.uf ?? '',
-            ownerCpf:
-              parsed.vehicle?.ownerCpf ?? '',
+            ownerCpf: parsed.vehicle?.ownerCpf ?? '',
           },
         };
 
         setProfile(normalized);
       } catch {
         // falha silenciosa: app real não quebra por storage
+        setProfile(null);
       } finally {
         setIsLoaded(true);
       }
     }
 
+    if (!isUserLoaded) return;
     loadProfile();
-  }, []);
+  }, [userId, isUserLoaded]);
 
   async function saveProfile(data: TechnicalProfile) {
-    setProfile(data);
-    await SecureStore.setItemAsync(
-      STORAGE_KEY,
-      JSON.stringify(data),
-    );
+    if (!userId) return;
+
+    // Regra do MVP:
+    // - o veículo precisa estar no nome do mesmo CPF do condutor (proprietário da CNH)
+    // - forçamos o ownerCpf do veículo a ser sempre igual ao cpf do driver
+    const normalized: TechnicalProfile = {
+      ...data,
+      vehicle: {
+        ...data.vehicle,
+        ownerCpf: data.driver.cpf,
+      },
+    };
+
+    const storageKey = getStorageKey(userId);
+
+    setProfile(normalized);
+    await SecureStore.setItemAsync(storageKey, JSON.stringify(normalized));
   }
 
   async function clearProfile() {
+    if (!userId) {
+      setProfile(null);
+      return;
+    }
+
+    const storageKey = getStorageKey(userId);
+
     setProfile(null);
-    await SecureStore.deleteItemAsync(STORAGE_KEY);
+    await SecureStore.deleteItemAsync(storageKey);
   }
 
   return (
@@ -158,13 +197,11 @@ export function TechnicalProfileProvider({
 ======================= */
 
 export function useTechnicalProfile(): TechnicalProfileContextData {
-  const context = useContext(
-    TechnicalProfileContext,
-  );
+  const context = useContext(TechnicalProfileContext);
 
   if (!context) {
     throw new Error(
-      'useTechnicalProfile must be used within a TechnicalProfileProvider',
+      'useTechnicalProfile must be used within a TechnicalProfileProvider'
     );
   }
 

@@ -9,10 +9,6 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
 
-    "extra": {
-      "ZAPAY_API_KEY": "SUA_CHAVE_REAL_DA_ZAPAY_AQUI"
-    },
-
     "ios": {
       "supportsTablet": true,
       "infoPlist": {

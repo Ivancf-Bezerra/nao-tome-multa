@@ -1,56 +1,44 @@
 import { useState } from 'react';
-import { Infraction } from './types';
+import { InfractionInput } from './types';
+import { analyzeInfraction } from '../analysis/TechnicalAnalyzer';
+import { buildAnalysisResult, AnalysisResult } from '../analysis/AnalysisResult';
 
-export type RequestStatus =
-  | 'idle'
-  | 'loading'
-  | 'success'
-  | 'error';
+export type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
 
 interface InfractionSearchState {
   status: RequestStatus;
   data?: {
-    infraction: Infraction;
+    input: InfractionInput;
+    result: AnalysisResult;
   };
   error?: string;
 }
 
 export function useInfractionSearch() {
-  const [state, setState] =
-    useState<InfractionSearchState>({
-      status: 'idle',
-    });
+  const [state, setState] = useState<InfractionSearchState>({ status: 'idle' });
 
-  function startManualAnalysis(
-    infraction: Infraction,
-  ) {
-    console.log(
-      '🟡 useInfractionSearch.startManualAnalysis',
-    );
-    console.log(
-      JSON.stringify(infraction, null, 2),
-    );
-
+  function startManualAnalysis(input: InfractionInput) {
     try {
       setState({ status: 'loading' });
 
+      const findings = analyzeInfraction(input);
+      const result = buildAnalysisResult(findings);
+
       setState({
         status: 'success',
-        data: {
-          infraction,
-        },
+        data: { input, result },
       });
     } catch {
       setState({
         status: 'error',
-        error:
-          'Falha técnica ao iniciar análise.',
+        error: 'Falha técnica ao processar a análise.',
       });
     }
   }
 
-  return {
-    state,
-    startManualAnalysis,
-  };
+  function reset() {
+    setState({ status: 'idle' });
+  }
+
+  return { state, startManualAnalysis, reset };
 }

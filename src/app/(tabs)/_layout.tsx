@@ -35,6 +35,48 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="documentos"
+        options={{
+          title: 'Documentos',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? 'scan' : 'scan-outline'}
+              size={20}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="defesas"
+        options={{
+          title: 'Defesas',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? 'shield' : 'shield-outline'}
+              size={20}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="status"
+        options={{
+          title: 'Status',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? 'document-text' : 'document-text-outline'}
+              size={20}
+              color={color}
+            />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

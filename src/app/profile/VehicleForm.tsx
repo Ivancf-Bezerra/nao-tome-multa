@@ -21,17 +21,14 @@ export interface VehicleData extends VehicleFipeData {
   ownerCpf: string;
 }
 
-/**
- * ⚠️ MOCK APENAS PARA TESTES DE DESENVOLVIMENTO
- */
-const MOCK_VEHICLE: VehicleData = {
-  plate: 'ABC1D23',
-  renavam: '12345678910',
-  brand: 'HONDA',
-  model: 'CIVIC',
-  city: 'SÃO PAULO',
-  uf: 'SP',
-  color: 'PRATA',
+const EMPTY_VEHICLE: VehicleData = {
+  plate: '',
+  renavam: '',
+  brand: '',
+  model: '',
+  city: '',
+  uf: '',
+  color: '',
   ownerCpf: '',
 };
 
@@ -40,7 +37,7 @@ const MOCK_VEHICLE: VehicleData = {
 ======================= */
 
 export default function VehicleForm({
-  data = MOCK_VEHICLE,
+  data = EMPTY_VEHICLE,
   onChange,
 }: {
   data?: VehicleData;
@@ -114,7 +111,7 @@ export default function VehicleForm({
 
       {/* PROPRIETÁRIO */}
       <Input
-        label="CPF do proprietário (opcional)"
+        label="CPF do proprietário (igual ao CPF do condutor)"
         value={vehicle.ownerCpf}
         keyboardType="numeric"
         onChange={(v) =>

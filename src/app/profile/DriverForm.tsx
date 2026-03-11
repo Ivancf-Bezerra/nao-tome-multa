@@ -26,21 +26,17 @@ const VALID_CNH_CATEGORIES = [
 
 type CnhCategory = typeof VALID_CNH_CATEGORIES[number];
 
-/**
- * ⚠️ MOCK APENAS PARA TESTES DE DESENVOLVIMENTO
- * Remover ou zerar em produção final.
- */
-const MOCK_DRIVER_DATA: DriverData = {
-  fullName: 'JOÃO CARLOS DA SILVA',
-  cpf: '123.456.789-09',
-  cnhNumber: '98765432100',
-  cnhCategory: 'B',
-  cnhExpiry: '15/08/2027',
-  cnhIssuerUF: 'SP',
+const EMPTY_DRIVER: DriverData = {
+  fullName: '',
+  cpf: '',
+  cnhNumber: '',
+  cnhCategory: '',
+  cnhExpiry: '',
+  cnhIssuerUF: '',
 };
 
 export default function DriverForm({
-  data = MOCK_DRIVER_DATA,
+  data = EMPTY_DRIVER,
   onChange,
 }: {
   data?: DriverData;

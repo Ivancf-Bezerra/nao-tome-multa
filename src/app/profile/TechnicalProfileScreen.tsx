@@ -6,6 +6,7 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -20,36 +21,36 @@ import {
 import DriverForm, { DriverData } from './DriverForm';
 import VehicleForm, { VehicleData } from './VehicleForm';
 import { onlyNumbers } from './masks';
+import { SAMPLE_DRIVER, SAMPLE_VEHICLE } from '../../data/profile/sampleProfiles';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.9;
 
 type Step = 'driver' | 'vehicle';
 
-/**
- * ⚠️ MOCK APENAS PARA TESTES DE DESENVOLVIMENTO
- * Não representa preenchimento automático.
- */
-const MOCK_DRIVER: DriverData = {
-  fullName: 'JOÃO CARLOS DA SILVA',
-  cpf: '123.456.789-09',
-  cnhNumber: '98765432100',
-  cnhCategory: 'B',
-  cnhExpiry: '15/08/2027',
-  cnhIssuerUF: 'SP',
+const EMPTY_DRIVER: DriverData = {
+  fullName: '',
+  cpf: '',
+  cnhNumber: '',
+  cnhCategory: '',
+  cnhExpiry: '',
+  cnhIssuerUF: '',
 };
 
-const MOCK_VEHICLE: VehicleData = {
-  plate: 'ABC1D23',
-  renavam: '12345678910',
-
-  brand: 'HONDA',
-  model: 'CIVIC',
-  city: 'SÃO PAULO',
-  uf: 'SP',
-  color: 'PRATA',
+const EMPTY_VEHICLE: VehicleData = {
+  plate: '',
+  renavam: '',
+  brand: '',
+  model: '',
+  city: '',
+  uf: '',
+  color: '',
   ownerCpf: '',
 };
+
+/** Em desenvolvimento: formulário inicia preenchido com dados de teste. */
+const INITIAL_DRIVER: DriverData = __DEV__ ? { ...SAMPLE_DRIVER } : EMPTY_DRIVER;
+const INITIAL_VEHICLE: VehicleData = __DEV__ ? { ...SAMPLE_VEHICLE } : EMPTY_VEHICLE;
 
 export default function TechnicalProfileScreen() {
   const router = useRouter();
@@ -57,8 +58,8 @@ export default function TechnicalProfileScreen() {
 
   const [step, setStep] = useState<Step>('driver');
 
-  const [driver, setDriver] = useState<DriverData>(MOCK_DRIVER);
-  const [vehicle, setVehicle] = useState<VehicleData>(MOCK_VEHICLE);
+  const [driver, setDriver] = useState<DriverData>(INITIAL_DRIVER);
+  const [vehicle, setVehicle] = useState<VehicleData>(INITIAL_VEHICLE);
 
   /* =======================
      VALIDAÇÃO MÍNIMA
@@ -91,9 +92,23 @@ export default function TechnicalProfileScreen() {
   async function handleSave() {
     if (!canSave) return;
 
+    const driverCpfDigits = onlyNumbers(driver.cpf);
+    const ownerCpfDigits = onlyNumbers(vehicle.ownerCpf);
+
+    if (ownerCpfDigits && ownerCpfDigits !== driverCpfDigits) {
+      Alert.alert(
+        'Veículo em nome de terceiro',
+        'Na versão atual do aplicativo (MVP), só é possível cadastrar veículos em nome do próprio condutor. Informe o CPF do condutor como proprietário do veículo. Em versões futuras, casos de veículos em nome de terceiros serão suportados.',
+      );
+      return;
+    }
+
     const profile: TechnicalProfile = {
       driver,
-      vehicle,
+      vehicle: {
+        ...vehicle,
+        ownerCpf: driver.cpf,
+      },
       createdAt: new Date().toISOString(),
     };
 

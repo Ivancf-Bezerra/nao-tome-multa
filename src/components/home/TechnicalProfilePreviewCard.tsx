@@ -18,15 +18,11 @@ export default function TechnicalProfilePreviewCard({
   if (!profile) return null;
 
   return (
-    <CardContainer >
+    <CardContainer>
       {/* HEADER */}
       <View className="flex-row items-center justify-between mb-4 border-b border-slate-800/50 pb-3">
         <View className="flex-row items-center gap-2">
-          <Ionicons
-            name="shield-checkmark-outline"
-            size={14}
-            color="#fbbf24"
-          />
+          <Ionicons name="shield-checkmark-outline" size={14} color="#fbbf24" />
           <Text className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
             Identidade Técnica
           </Text>
@@ -36,32 +32,25 @@ export default function TechnicalProfilePreviewCard({
         <View className="flex-row items-center gap-2 -mr-2">
           {/* EDITAR */}
           <Pressable
-            onPress={() =>
-              router.push('/profile/TechnicalProfileScreen')
-            }
+            onPress={() => router.push('/profile/TechnicalProfileScreen')}
             className="flex-row items-center gap-1 active:opacity-60 px-2 py-1"
+            hitSlop={10}
           >
             <Text className="text-[10px] font-medium text-amber-500 uppercase">
               Editar
             </Text>
-            <Ionicons
-              name="pencil-sharp"
-              size={10}
-              color="#fbbf24"
-            />
+            <Ionicons name="pencil-sharp" size={10} color="#fbbf24" />
           </Pressable>
 
-          {/* EXCLUIR */}
+          {/* EXCLUIR (sem Alert aqui) */}
           <Pressable
             onPress={onDeleteProfile}
-            className="active:opacity-60 px-2 py-1"
+            className="active:opacity-60 px-2 py-1 rounded-md border border-red-500/30 bg-red-500/10"
             accessibilityLabel="Excluir cadastro técnico"
+            accessibilityRole="button"
+            hitSlop={12}
           >
-            <Ionicons
-              name="trash-outline"
-              size={12}
-              color="#f87171"
-            />
+            <Ionicons name="trash-outline" size={12} color="#f87171" />
           </Pressable>
         </View>
       </View>
@@ -73,6 +62,7 @@ export default function TechnicalProfilePreviewCard({
             <Text className="text-[9px] font-bold uppercase text-slate-500 mb-2">
               Condutor Principal
             </Text>
+
             <Text
               className="text-lg font-bold text-white leading-tight mb-2"
               numberOfLines={1}
@@ -80,9 +70,9 @@ export default function TechnicalProfilePreviewCard({
             >
               {profile.driver.fullName}
             </Text>
+
             <Text className="text-x text-amber-500 font-mono">
-              CPF ***.
-              {profile.driver.cpf.slice(3, 6)}.
+              CPF ***.{profile.driver.cpf.slice(3, 6)}.
               {profile.driver.cpf.slice(6, 9)}-**
             </Text>
           </View>
@@ -93,6 +83,7 @@ export default function TechnicalProfilePreviewCard({
                 CNH {profile.driver.cnhCategory}
               </Text>
             </View>
+
             <Text className="text-[9px] text-slate-500">
               Vence em {profile.driver.cnhExpiry}
             </Text>
@@ -118,7 +109,9 @@ export default function TechnicalProfilePreviewCard({
             <Text className="text-[10px] text-amber-500/90 font-bold uppercase tracking-wide">
               {profile.vehicle.color || 'COR N/D'}
             </Text>
+
             <View className="h-0.5 w-0.5 rounded-full bg-slate-600" />
+
             <Text
               className="text-[10px] text-slate-500 flex-1"
               numberOfLines={1}
