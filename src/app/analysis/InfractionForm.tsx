@@ -3,6 +3,7 @@ import { View, Text } from 'react-native';
 import Input from '../profile/Input';
 import { InfractionInput } from '../../services/infractions/types';
 import { formatDate } from '../profile/masks';
+import { useThemeClasses } from '../../context/ThemeContext';
 
 export type InfractionFormData = InfractionInput;
 
@@ -12,9 +13,11 @@ interface Props {
 }
 
 function Section({ title }: { title: string }) {
+  const tc = useThemeClasses();
+
   return (
-    <View className="mt-6 mb-2">
-      <Text className="text-xs font-semibold text-amber-500 uppercase tracking-widest">
+    <View className="mt-6 mb-3">
+      <Text className={`text-sm font-semibold ${tc.sectionLabel}`}>
         {title}
       </Text>
     </View>
@@ -29,7 +32,7 @@ export default function InfractionForm({ data, onChange }: Props) {
   return (
     <View>
       {/* ─── IDENTIFICAÇÃO ─── */}
-      <Section title="Identificação" />
+      <Section title="Dados básicos da multa" />
 
       <Input
         label="Número do AIT"
@@ -38,6 +41,15 @@ export default function InfractionForm({ data, onChange }: Props) {
         keyboardType="default"
         onChange={(v) => update({ aitNumber: v })}
         helperText="Número do Auto de Infração de Trânsito conforme notificação."
+      />
+
+      <Input
+        label="Descrição da infração"
+        value={data.description}
+        placeholder="Ex: Excesso de velocidade"
+        multiline
+        onChange={(v) => update({ description: v })}
+        helperText="Descrição conforme consta na notificação oficial."
       />
 
       <Input
@@ -56,15 +68,6 @@ export default function InfractionForm({ data, onChange }: Props) {
         keyboardType="numeric"
         onChange={(v) => update({ infractionCode: v })}
         helperText="Código de enquadramento conforme o CTB."
-      />
-
-      <Input
-        label="Descrição da infração"
-        value={data.description}
-        placeholder="Ex: Excesso de velocidade"
-        multiline
-        onChange={(v) => update({ description: v })}
-        helperText="Descrição conforme consta na notificação oficial."
       />
 
       {/* ─── ÓRGÃOS ─── */}
@@ -103,7 +106,7 @@ export default function InfractionForm({ data, onChange }: Props) {
       />
 
       {/* ─── AGENTE E EQUIPAMENTO ─── */}
-      <Section title="Agente e Equipamento" />
+      <Section title="Agente e equipamento" />
 
       <Input
         label="Identificação do agente"
@@ -131,7 +134,7 @@ export default function InfractionForm({ data, onChange }: Props) {
       />
 
       {/* ─── DADOS DA INFRAÇÃO ─── */}
-      <Section title="Dados da Infração" />
+      <Section title="Dados da infração" />
 
       <Input
         label="Data da infração"

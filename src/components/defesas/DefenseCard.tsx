@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import { useThemeClasses } from '../../context/ThemeContext';
 import { AnalyzedInfractionRecord, InconsistencySeverity } from './types';
+import TouchableScale from '../ui/TouchableScale';
 
 type Props = {
   record: AnalyzedInfractionRecord;
@@ -40,7 +41,7 @@ export default function DefenseCard({ record, onView, onSend, onDelete }: Props)
   return (
     <View className={`rounded-2xl p-4 mb-4 ${tc.cardAlt}`}>
       <View className="flex-row items-start justify-between">
-        <Pressable onPress={onView} className="flex-1 pr-3">
+        <View className="flex-1 pr-3">
           <View className="flex-row items-center">
             <Ionicons
               name="alert-circle"
@@ -66,51 +67,58 @@ export default function DefenseCard({ record, onView, onSend, onDelete }: Props)
               <Ionicons
                 name={hasDefense ? 'checkmark-circle' : 'document-text-outline'}
                 size={14}
-                color={hasDefense ? '#22c55e' : '#60a5fa'}
+                color={hasDefense ? '#22c55e' : '#f59e0b'}
               />
-              <Text className={`${tc.buttonSecondaryText} text-xs ml-2`}>
+              <Text
+                className={`text-xs ml-2 ${
+                  hasDefense ? tc.buttonSecondaryText : 'font-semibold text-amber-500'
+                }`}
+              >
                 {hasDefense ? 'Defesa gerada' : 'Aguardando defesa'}
               </Text>
             </View>
           </View>
-        </Pressable>
-
-        <View className="flex-row items-center">
-          <Pressable
-            onPress={onView}
-            className="h-10 w-10 items-center justify-center rounded-xl"
-          >
-            <Ionicons name="eye-outline" size={18} color={tc.iconMuted} />
-          </Pressable>
-
-          <Pressable
-            onPress={hasDefense ? onSend : undefined}
-            disabled={!hasDefense}
-            className={`h-10 w-10 items-center justify-center rounded-xl ml-2 ${
-              hasDefense ? `${tc.buttonSecondary} active:opacity-90` : `${tc.buttonSecondary} opacity-60`
-            }`}
-          >
-            <Ionicons
-              name="send-outline"
-              size={18}
-              color={hasDefense ? '#f59e0b' : tc.iconMuted}
-            />
-          </Pressable>
-
-          <Pressable
-            onPress={onDelete}
-            className={`h-10 w-10 items-center justify-center rounded-xl ml-2 ${tc.buttonSecondary}`}
-          >
-            <Ionicons name="trash-outline" size={18} color={tc.iconMuted} />
-          </Pressable>
         </View>
+
+        <TouchableScale
+          onPress={onDelete}
+          style={{ height: 40, width: 40, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <Ionicons name="trash-outline" size={20} color="#f87171" />
+        </TouchableScale>
       </View>
 
-      <View className={`mt-4 pt-4 ${tc.borderB}`}>
-        <Text className={`${tc.buttonSecondaryText} text-xs`}>
-          Resumo:{' '}
-          <Text className={tc.text}>{record.result.summary}</Text>
-        </Text>
+      <View className="mt-3 flex-row gap-3">
+        <TouchableScale
+          onPress={onView}
+          style={{ flex: 1 }}
+        >
+          <View className={`rounded-xl py-3 border ${tc.buttonSecondary} border-amber-400`}>
+            <Text className={`text-center text-sm font-semibold ${tc.buttonSecondaryText}`}>
+              Acessar
+            </Text>
+          </View>
+        </TouchableScale>
+
+        <TouchableScale
+          onPress={hasDefense ? onSend : undefined}
+          disabled={!hasDefense}
+          style={{ flex: 1 }}
+        >
+          <View
+            className={`rounded-xl py-3 ${
+              hasDefense ? 'bg-amber-400' : tc.buttonDisabled
+            }`}
+          >
+            <Text
+              className={`text-center text-sm font-semibold ${
+                hasDefense ? 'text-slate-900' : tc.buttonDisabledText
+              }`}
+            >
+              Enviar
+            </Text>
+          </View>
+        </TouchableScale>
       </View>
     </View>
   );

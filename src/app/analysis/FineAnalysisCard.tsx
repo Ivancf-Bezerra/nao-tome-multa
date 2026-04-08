@@ -1,6 +1,7 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text } from 'react-native';
 
 import { useThemeClasses } from '../../context/ThemeContext';
+import TouchableScale from '../../components/ui/TouchableScale';
 
 interface FineAnalysisCardProps {
   onStartAnalysis: () => void;
@@ -21,14 +22,13 @@ export default function FineAnalysisCard({
         Informe os dados da multa para gerar o parecer técnico.
       </Text>
 
-      <Pressable
-        onPress={onStartAnalysis}
-        className="mt-4 rounded-xl bg-amber-400 py-4 active:opacity-90"
-      >
-        <Text className="text-center text-xs font-semibold uppercase tracking-widest text-slate-900">
-          Adicionar multa para análise
-        </Text>
-      </Pressable>
+      <TouchableScale onPress={onStartAnalysis} style={{ marginTop: 16 }}>
+        <View className="rounded-xl bg-amber-400 py-4">
+          <Text className="text-center text-xs font-semibold uppercase tracking-widest text-slate-900">
+            Adicionar multa para análise
+          </Text>
+        </View>
+      </TouchableScale>
 
       <Text className={`mt-3 text-center text-[10px] leading-relaxed ${tc.textSubtle}`}>
         A análise não garante resultado administrativo ou judicial.

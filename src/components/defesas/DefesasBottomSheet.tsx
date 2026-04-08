@@ -31,12 +31,12 @@ export default function DefesasBottomSheet({ records, onView, onSend, onDelete }
               Histórico de defesas
             </Text>
             <Text className={`${tc.textMuted} text-xs mt-1`}>
-              Infrações com inconsistências técnicas detectadas
+              Cada linha reúne AIT, resumo e situação da defesa.
             </Text>
           </View>
 
-          <View className={`h-10 w-10 items-center justify-center rounded-xl border ${tc.buttonSecondary}`}>
-            <Ionicons name="shield" size={18} color="#f59e0b" />
+          <View className="h-10 w-10 items-center justify-center">
+            <Ionicons name="shield" size={26} color="#f59e0b" />
           </View>
         </View>
 

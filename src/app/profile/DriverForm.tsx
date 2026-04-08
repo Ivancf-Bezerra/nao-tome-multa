@@ -2,6 +2,7 @@ import { Text, View } from 'react-native';
 import { useMemo, useState } from 'react';
 import Input from './Input';
 import { formatCPF, formatDate, onlyNumbers } from './masks';
+import { useThemeClasses } from '../../context/ThemeContext';
 
 export interface DriverData {
   fullName: string;
@@ -42,6 +43,7 @@ export default function DriverForm({
   data?: DriverData;
   onChange: (data: DriverData) => void;
 }) {
+  const tc = useThemeClasses();
   const [touched, setTouched] = useState<Record<keyof DriverData, boolean>>({
     fullName: false,
     cpf: false,
@@ -101,10 +103,10 @@ export default function DriverForm({
     <View className="mt-6 gap-4">
       {/* Header institucional */}
       <View className="gap-1">
-        <Text className="text-base font-semibold text-white">
+        <Text className={`text-base font-semibold ${tc.text}`}>
           Dados do condutor
         </Text>
-        <Text className="text-xs text-neutral-400">
+        <Text className={`text-xs ${tc.textMuted}`}>
           Informações utilizadas para identificação administrativa do condutor.
         </Text>
       </View>
@@ -153,7 +155,7 @@ export default function DriverForm({
 
       {/* Categoria da CNH */}
       <View className="gap-2">
-        <Text className="text-xs font-medium text-neutral-400">
+        <Text className={`text-xs font-medium ${tc.textMuted}`}>
           Categoria da habilitação
         </Text>
 
@@ -172,7 +174,7 @@ export default function DriverForm({
                   'px-3 py-2 rounded-md text-xs text-center',
                   selected
                     ? 'bg-amber-500 text-black'
-                    : 'bg-neutral-900 border border-neutral-700 text-neutral-300',
+                    : tc.chipUnselected,
                 ].join(' ')}
               >
                 {category}

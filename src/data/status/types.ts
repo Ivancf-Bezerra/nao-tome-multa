@@ -25,8 +25,14 @@ export interface StatusMultaEnviada {
   /** Dados para gerar recurso à JARI quando a defesa não for suficiente (opcional) */
   findings?: InconsistencyRule[];
   input?: InfractionInput;
+  /** Resumo da análise técnica (mesmo conteúdo enviado ao órgão) */
+  summary?: string;
+  /** Texto da defesa prévia gerada em Defesas (exibido no modal como defesa enviada) */
+  defesaPrevia?: string;
   /** Recurso à JARI gerado (preenchido após confirmação de necessidade na aba Status) */
   recursoJARI?: string;
+  /** Indica se o usuário já leu e confirmou as instruções de envio do recurso à JARI para esta multa */
+  ackJariInstructions?: boolean;
 }
 
 export const STATUS_LABELS: Record<StatusMultaEnviadaCode, string> = {

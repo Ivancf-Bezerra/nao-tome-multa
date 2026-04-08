@@ -24,6 +24,8 @@ import { useStatusMultas } from "../../context/StatusMultasContext";
 import { useThemeClasses } from "../../context/ThemeContext";
 import { addStatusMulta } from "../../storage/statusStorage";
 import type { StatusMultaEnviada } from "../../data/status/types";
+import TouchableScale from "../../components/ui/TouchableScale";
+import GlobalHeader from "../../components/layout/GlobalHeader";
 
 export default function Defesas() {
   const navigation = useNavigation();
@@ -113,6 +115,8 @@ export default function Defesas() {
             "Defesa encaminhada ao órgão competente. Acompanhe o status nesta aba.",
           findings: record.result.findings,
           input: record.input,
+          summary: record.result.summary,
+          defesaPrevia: record.defense?.defesaPrevia ?? "",
         };
         await addStatusMulta(user.id, statusItem);
         await deleteDefesa(user.id, record.id);
@@ -234,6 +238,8 @@ export default function Defesas() {
           "Defesa encaminhada ao órgão competente. Acompanhe o status nesta aba.",
         findings: recordToProcess.result.findings,
         input: recordToProcess.input,
+        summary: recordToProcess.result.summary,
+        defesaPrevia: recordToProcess.defense?.defesaPrevia ?? "",
       };
 
       await addStatusMulta(user.id, statusItem);
@@ -259,27 +265,30 @@ export default function Defesas() {
 
       <LinearGradient colors={[...tc.screenGradient]} style={{ flex: 1 }}>
         <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
-          <View className="w-[90%] self-center pt-4">
+          <GlobalHeader />
+
+          <View className="h-4" />
+
+          <View className="w-[90%] self-center" style={{ minHeight: 72 }}>
             <Text className={`${tc.text} text-xl font-semibold`}>Defesas</Text>
-            <Text className={`${tc.textMuted} text-sm mt-2`}>
-              Multas com inconsistências técnicas detectadas.
-            </Text>
-            <Text className={`${tc.textSubtle} text-xs mt-1`}>
-              Após compartilhar a defesa, acompanhe o andamento na aba Status.
+            <Text className={`${tc.textMuted} text-base mt-2 leading-relaxed`} numberOfLines={3}>
+              Multas com inconsistências detectadas que podem gerar defesa.
             </Text>
 
             {__DEV__ && (
-              <Pressable
+              <TouchableScale
                 onPress={handleLoadSamples}
                 disabled={isLoadingSamples}
-                className="mt-4 rounded-xl border border-amber-400/50 bg-amber-400/10 py-3 active:opacity-90"
+                style={{ marginTop: 16 }}
               >
-                <Text className="text-center text-sm font-semibold text-amber-500">
-                  {isLoadingSamples
-                    ? "Carregando…"
-                    : "Carregar exemplos de multas"}
-                </Text>
-              </Pressable>
+                <View className="rounded-xl border border-amber-400/50 bg-amber-400/10 py-3">
+                  <Text className="text-center text-sm font-semibold text-amber-500">
+                    {isLoadingSamples
+                      ? "Carregando…"
+                      : "Carregar exemplos de multas"}
+                  </Text>
+                </View>
+              </TouchableScale>
             )}
           </View>
 
@@ -327,35 +336,39 @@ export default function Defesas() {
             </Text>
 
             <View className="flex-row gap-3 mt-2">
-              <Pressable
-                className={`flex-1 rounded-xl py-3 items-center border ${tc.buttonSecondary}`}
+              <TouchableScale
                 onPress={() => {
                   setPostShareVisible(false);
                   (navigation as { navigate: (name: string) => void }).navigate(
                     "home",
                   );
                 }}
+                style={{ flex: 1 }}
               >
-                <Text
-                  className={`text-sm font-semibold ${tc.buttonSecondaryText}`}
-                >
-                  Voltar para início
-                </Text>
-              </Pressable>
+                <View className={`rounded-xl py-3 items-center border ${tc.buttonSecondary}`}>
+                  <Text
+                    className={`text-sm font-semibold ${tc.buttonSecondaryText}`}
+                  >
+                    Voltar para início
+                  </Text>
+                </View>
+              </TouchableScale>
 
-              <Pressable
-                className="flex-1 rounded-xl py-3 items-center bg-amber-400 active:opacity-90"
+              <TouchableScale
                 onPress={() => {
                   setPostShareVisible(false);
                   (navigation as { navigate: (name: string) => void }).navigate(
                     "status",
                   );
                 }}
+                style={{ flex: 1 }}
               >
-                <Text className="text-sm font-semibold text-slate-900">
-                  Ir para Status
-                </Text>
-              </Pressable>
+                <View className="rounded-xl py-3 items-center bg-amber-400">
+                  <Text className="text-sm font-semibold text-slate-900">
+                    Ir para Status
+                  </Text>
+                </View>
+              </TouchableScale>
             </View>
           </View>
         </View>

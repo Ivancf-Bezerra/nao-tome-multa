@@ -4,15 +4,19 @@ import {
     useAuth,
     useUser,
 } from '@clerk/clerk-expo';
-import { Slot, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { useEffect } from 'react';
 import '../../global.css';
 
+import { PlanUpgradeProvider } from '../context/PlanUpgradeContext';
+import { SettingsModalProvider } from '../context/SettingsModalContext';
 import { StatusMultasProvider } from '../context/StatusMultasContext';
 import { SubscriptionProvider } from '../context/SubscriptionContext';
 import { TechnicalProfileProvider } from '../context/TechnicalProfileContext';
 import { ThemeProvider } from '../context/ThemeContext';
+import PlanUpgradeModal from '../components/subscription/PlanUpgradeModal';
+import SettingsModal from '../components/settings/SettingsModal';
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
@@ -54,9 +58,7 @@ function AuthGate() {
     const inProfileGroup = rootSegment === 'profile';
     const inSubscriptionGroup = rootSegment === 'subscription';
 
-    const isSettings = rootSegment === 'settings';
     const isLegal = rootSegment === 'legal';
-
     const isSplash = rootSegment === undefined;
 
     if (!isSignedIn) {
@@ -71,7 +73,6 @@ function AuthGate() {
         inTabsGroup ||
         inProfileGroup ||
         inSubscriptionGroup ||
-        isSettings ||
         isLegal ||
         isSplash;
 
@@ -86,7 +87,20 @@ function AuthGate() {
       <TechnicalProfileProvider key={user?.id ?? 'guest'}>
         <SubscriptionProvider>
           <StatusMultasProvider>
-            <Slot />
+            <SettingsModalProvider>
+              <PlanUpgradeProvider>
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="index" />
+                  <Stack.Screen name="(tabs)" />
+                  <Stack.Screen name="auth" />
+                  <Stack.Screen name="profile" />
+                  <Stack.Screen name="subscription" />
+                  <Stack.Screen name="legal" options={{ presentation: 'card', headerShown: false }} />
+                </Stack>
+                <SettingsModal />
+                <PlanUpgradeModal />
+              </PlanUpgradeProvider>
+            </SettingsModalProvider>
           </StatusMultasProvider>
         </SubscriptionProvider>
       </TechnicalProfileProvider>

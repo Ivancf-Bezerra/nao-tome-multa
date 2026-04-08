@@ -8,10 +8,12 @@ import CardContainer from '../ui/CardContainer';
 
 interface TechnicalProfilePreviewCardProps {
   onDeleteProfile: () => void;
+  onEditProfile?: () => void;
 }
 
 export default function TechnicalProfilePreviewCard({
   onDeleteProfile,
+  onEditProfile,
 }: TechnicalProfilePreviewCardProps) {
   const router = useRouter();
   const { profile } = useTechnicalProfile();
@@ -35,7 +37,11 @@ export default function TechnicalProfilePreviewCard({
         <View className="flex-row items-center gap-2 -mr-2">
           {/* EDITAR */}
           <Pressable
-            onPress={() => router.push('/profile/TechnicalProfileScreen')}
+            onPress={
+              onEditProfile
+                ? onEditProfile
+                : () => router.push('/profile/TechnicalProfileScreen')
+            }
             className="flex-row items-center gap-1 active:opacity-60 px-2 py-1"
             hitSlop={10}
           >
@@ -48,12 +54,12 @@ export default function TechnicalProfilePreviewCard({
           {/* EXCLUIR (sem Alert aqui) */}
           <Pressable
             onPress={onDeleteProfile}
-            className="active:opacity-60 px-2 py-1 rounded-md border border-red-500/30 bg-red-500/10"
+            className="active:opacity-60 px-2 py-1"
             accessibilityLabel="Excluir cadastro técnico"
             accessibilityRole="button"
             hitSlop={12}
           >
-            <Ionicons name="trash-outline" size={12} color="#f87171" />
+            <Ionicons name="trash-outline" size={20} color="#f87171" />
           </Pressable>
         </View>
       </View>
@@ -96,10 +102,6 @@ export default function TechnicalProfilePreviewCard({
 
       {/* BLOCO 2: VEÍCULO */}
       <View className={`rounded-lg p-4 flex-row items-center gap-4 ${tc.cardAlt}`}>
-        <View className={`h-10 w-10 items-center justify-center rounded border ${tc.buttonSecondary}`}>
-          <Ionicons name="car-sport" size={18} color={tc.iconMuted} />
-        </View>
-
         <View className="flex-1 justify-center">
           <Text
             className={`text-sm font-semibold leading-tight mb-1 ${tc.buttonSecondaryText}`}

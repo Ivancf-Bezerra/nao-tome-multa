@@ -7,6 +7,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useThemeClasses } from '../context/ThemeContext';
+import GlobalHeader from '../components/layout/GlobalHeader';
 
 export default function Legal() {
   const router = useRouter();
@@ -18,19 +19,19 @@ export default function Legal() {
 
       <LinearGradient colors={[...tc.screenGradient]} style={{ flex: 1 }}>
         <SafeAreaView edges={['top']} style={{ flex: 1 }}>
-          {/* Header */}
-          <View className="px-6 pt-2 pb-4 flex-row items-center justify-between">
+          <GlobalHeader />
+
+          {/* Header local com botão voltar (submenu) */}
+          <View className="px-6 pt-4 pb-4 flex-row items-center justify-between">
             <Pressable
               onPress={() => router.back()}
               className={`h-10 w-10 items-center justify-center rounded-full border active:opacity-80 ${tc.header}`}
             >
               <Ionicons name="chevron-back" size={18} color={tc.iconPrimary} />
             </Pressable>
-
             <Text className={`${tc.text} text-base font-semibold`}>
               Termos e privacidade
             </Text>
-
             <View className="h-10 w-10" />
           </View>
 
@@ -57,7 +58,7 @@ export default function Legal() {
                     Privacidade
                   </Text>
 
-                  <Text className={`${tc.textMuted} text-sm mt-3 leading-5`}>
+                <Text className={`${tc.textMuted} text-base mt-3 leading-relaxed`}>
                     Os dados informados pelo usuário são utilizados para exibição
                     e organização dentro do aplicativo. O app não realiza
                     monitoramento automático de sistemas públicos.
@@ -69,7 +70,7 @@ export default function Legal() {
                     Responsabilidade
                   </Text>
 
-                  <Text className={`${tc.textMuted} text-sm mt-3 leading-5`}>
+                  <Text className={`${tc.textMuted} text-base mt-3 leading-relaxed`}>
                     O usuário é responsável por validar informações com fontes
                     oficiais. O app atua como suporte de clareza técnica e
                     organização.

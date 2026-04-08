@@ -1,9 +1,9 @@
 import { View, Pressable, Image, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '@clerk/clerk-expo';
-import { useRouter } from 'expo-router';
 
 import { useThemeClasses } from '../../context/ThemeContext';
+import { useSettingsModal } from '../../context/SettingsModalContext';
 
 type HomeHeaderProps = {
   onOpenNotifications?: () => void;
@@ -15,18 +15,26 @@ export default function HomeHeader({
   onOpenNotifications,
   unreadStatusCount = 0,
 }: HomeHeaderProps) {
-  const router = useRouter();
+  const { open: openSettings, isOpen: isSettingsOpen, close: closeSettings } = useSettingsModal();
   const { user, isLoaded } = useUser();
   const tc = useThemeClasses();
   const showBadge = unreadStatusCount > 0;
 
   const btnClass = tc.header;
 
+  function handlePressSettings() {
+    if (isSettingsOpen) {
+      closeSettings();
+    } else {
+      openSettings();
+    }
+  }
+
   return (
     <View className="flex-row items-center justify-between px-6 py-2 w-full">
       {/* Engrenagem (Settings) */}
       <Pressable
-        onPress={() => router.push('/settings')}
+          onPress={handlePressSettings}
         className={`h-10 w-10 items-center justify-center rounded-full border active:opacity-80 ${btnClass}`}
       >
         <Ionicons name="settings-outline" size={20} color={tc.iconMuted} />

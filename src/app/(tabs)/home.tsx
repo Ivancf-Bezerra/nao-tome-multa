@@ -7,24 +7,23 @@ import { useRouter } from 'expo-router';
 import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 
-import HomeHeader from '../../components/home/HomeHeader';
 import WelcomeMessage from '../../components/home/WelcomeMessage';
-import TechnicalProfileCard from '../../components/home/TechnicalProfileCard';
 import TechnicalProfilePreviewCard from '../../components/home/TechnicalProfilePreviewCard';
-import NotificationsModal from '../../components/home/NotificationsModal';
 import FineAnalysisCard from '../analysis/FineAnalysisCard';
 import InfractionForm, { InfractionFormData } from '../analysis/InfractionForm';
 import SubscriptionBanner from '../../components/subscription/SubscriptionBanner';
+import GlobalHeader from '../../components/layout/GlobalHeader';
 
 import { useTechnicalProfile } from '../../context/TechnicalProfileContext';
 import { useSubscription } from '../../context/SubscriptionContext';
-import { useStatusMultas } from '../../context/StatusMultasContext';
 import { useThemeClasses } from '../../context/ThemeContext';
+import { usePlanUpgrade } from '../../context/PlanUpgradeContext';
 import { useInfractionSearch } from '../../services/infractions/useInfractionSearch';
 import { addDefesa } from '../../components/defesas/storage';
 import { AnalyzedInfractionRecord } from '../../components/defesas/types';
 import { SAMPLE_INFRACTION_INPUT } from '../../data/infractions/sampleInfractionInput';
 import DocumentsSheet from '../../components/documents/DocumentsSheet';
+import TouchableScale from '../../components/ui/TouchableScale';
 
 const EMPTY_FORM: InfractionFormData = {
   aitNumber: '',
@@ -53,19 +52,15 @@ export default function Home() {
   const { profile, clearProfile } = useTechnicalProfile();
   const tc = useThemeClasses();
   const { isActive } = useSubscription();
-  const { items: statusItems, lastReadAt, unreadCount: statusUnreadCount } = useStatusMultas();
-  const unreadStatusItems =
-    !lastReadAt || lastReadAt === ''
-      ? statusItems
-      : statusItems.filter((i) => i.updatedAt > lastReadAt);
+  const { showPlanUpgrade } = usePlanUpgrade();
   const { state, startManualAnalysis, reset } = useInfractionSearch();
 
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [isDeletingProfile, setIsDeletingProfile] = useState(false);
   const [feedbackVisible, setFeedbackVisible] = useState(false);
   const [infractionModalOpen, setInfractionModalOpen] = useState(false);
   const [documentsModalOpen, setDocumentsModalOpen] = useState(false);
+  const [editOptionsOpen, setEditOptionsOpen] = useState(false);
   const [infractionForm, setInfractionForm] = useState<InfractionFormData>(INITIAL_FORM);
 
   const hasTechnicalProfile = Boolean(profile);
@@ -123,17 +118,10 @@ export default function Home() {
     }
 
     if (!isActive) {
-      Alert.alert(
-        'Recurso disponível no plano pago',
-        'A análise técnica de multas e a geração automática de defesas estão disponíveis apenas para assinantes. Ative um plano para continuar.',
-        [
-          { text: 'Agora não', style: 'cancel' },
-          {
-            text: 'Ver planos',
-            onPress: () => router.push('/subscription/plans'),
-          },
-        ],
-      );
+      showPlanUpgrade({
+        feature: 'Análise técnica de multas',
+        requiredPlan: 'starter',
+      });
       return;
     }
 
@@ -146,42 +134,59 @@ export default function Home() {
 
       <LinearGradient colors={[...tc.screenGradient]} style={{ flex: 1 }}>
         <SafeAreaView edges={['top']} style={{ flex: 1 }}>
-          <HomeHeader
-            onOpenNotifications={() => setNotificationsOpen(true)}
-            unreadStatusCount={statusUnreadCount}
-          />
+          <GlobalHeader />
 
-          <View className="h-6" />
+          <View className="h-4" />
           <WelcomeMessage />
 
           <View className="w-[90%] self-center">
-            <Pressable
-              onPress={() => setDocumentsModalOpen(true)}
-              className={`mb-4 rounded-2xl border-2 border-amber-400/70 px-4 py-3 flex-row items-center active:opacity-90 ${tc.cardAlt}`}
-            >
-              <View className="flex-1 pr-3">
-                <Text className="text-[11px] font-semibold uppercase tracking-widest text-amber-500">
-                  Preenchimento com documentos
-                </Text>
-                <Text className={`${tc.textMuted} text-xs mt-1 leading-5`}>
-                  Use a CNH e o documento do veículo para preencher ou atualizar o cadastro técnico.
-                </Text>
-              </View>
-              <View className="h-9 w-9 items-center justify-center rounded-full bg-amber-400/10 border border-amber-400/40">
-                <Ionicons name="scan-outline" size={18} color="#f59e0b" />
-              </View>
-            </Pressable>
-
             {!hasTechnicalProfile && (
-              <TechnicalProfileCard
-                onPress={() => router.push('/profile/TechnicalProfileScreen')}
-              />
+              <View className={`mt-2 rounded-2xl px-6 py-6 ${tc.card}`}>
+                <View className="flex-row items-center gap-3">
+                  <View className="h-9 w-9 items-center justify-center rounded-full bg-amber-400/10 border border-amber-300/60">
+                    <Ionicons name="id-card-outline" size={18} color="#f59e0b" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className={`text-sm font-semibold ${tc.text}`}>
+                      Cadastro técnico do condutor e veículo
+                    </Text>
+                    <Text className={`${tc.textMuted} text-xs mt-1`}>
+                      Use seus documentos para preencher ou revisar os dados técnicos antes de analisar multas.
+                    </Text>
+                  </View>
+                </View>
+
+                <View className="mt-5 flex-row gap-3">
+                  <TouchableScale
+                    onPress={() => router.push('/profile/TechnicalProfileScreen')}
+                    style={{ flex: 1 }}
+                  >
+                    <View className="rounded-xl bg-amber-400 px-4 py-3">
+                      <Text className="text-center text-sm font-semibold text-slate-900">
+                        Cadastrar dados técnicos
+                      </Text>
+                    </View>
+                  </TouchableScale>
+
+                  <TouchableScale
+                    onPress={() => setDocumentsModalOpen(true)}
+                    style={{ flex: 1 }}
+                  >
+                    <View className="rounded-xl border border-amber-300/70 bg-amber-50 px-4 py-3">
+                      <Text className="text-center text-[11px] font-semibold text-amber-700">
+                        Usar documentos (CNH e CRLV)
+                      </Text>
+                    </View>
+                  </TouchableScale>
+                </View>
+              </View>
             )}
 
             {hasTechnicalProfile && (
               <>
                 <TechnicalProfilePreviewCard
                   onDeleteProfile={() => setConfirmDeleteOpen(true)}
+                  onEditProfile={() => setEditOptionsOpen(true)}
                 />
 
                 {isActive ? (
@@ -197,6 +202,61 @@ export default function Home() {
         </SafeAreaView>
       </LinearGradient>
 
+      {/* OPÇÕES DE EDIÇÃO DO CADASTRO TÉCNICO */}
+      <Modal
+        visible={editOptionsOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setEditOptionsOpen(false)}
+      >
+        <View className="flex-1 bg-black/70 items-center justify-center px-6">
+          <View className={`w-full max-w-[420px] rounded-2xl border p-5 ${tc.modalBg} ${tc.border}`}>
+            <Text className={`${tc.text} text-base font-semibold`}>
+              Como deseja atualizar o cadastro?
+            </Text>
+            <Text className={`${tc.textMuted} text-sm mt-2 leading-5`}>
+              Você pode ajustar manualmente os dados ou reaproveitar as informações dos documentos.
+            </Text>
+
+            <View className="mt-5 gap-3">
+              <TouchableScale
+                onPress={() => {
+                  setEditOptionsOpen(false);
+                  router.push('/profile/TechnicalProfileScreen');
+                }}
+              >
+                <View className="rounded-xl bg-amber-400 px-4 py-3">
+                  <Text className="text-center text-sm font-semibold text-slate-900">
+                    Editar cadastro manualmente
+                  </Text>
+                </View>
+              </TouchableScale>
+
+              <TouchableScale
+                onPress={() => {
+                  setEditOptionsOpen(false);
+                  setDocumentsModalOpen(true);
+                }}
+              >
+                <View className={`rounded-xl px-4 py-3 border ${tc.buttonSecondary}`}>
+                  <Text
+                    className={`text-center text-sm font-semibold ${tc.buttonSecondaryText}`}
+                  >
+                    Atualizar a partir dos documentos
+                  </Text>
+                </View>
+              </TouchableScale>
+            </View>
+
+            <TouchableScale onPress={() => setEditOptionsOpen(false)}>
+              <View className="mt-3 items-center">
+                <Text className={`${tc.textSubtle} text-xs`}>Cancelar</Text>
+              </View>
+            </TouchableScale>
+          </View>
+        </View>
+      </Modal>
+
       {/* MODAL DOCUMENTOS */}
       <Modal
         visible={documentsModalOpen}
@@ -210,7 +270,10 @@ export default function Home() {
             onPress={() => setDocumentsModalOpen(false)}
           />
 
-          <DocumentsSheet onClose={() => setDocumentsModalOpen(false)} />
+          <DocumentsSheet
+            isOpen={documentsModalOpen}
+            onClose={() => setDocumentsModalOpen(false)}
+          />
         </View>
       </Modal>
 
@@ -245,23 +308,26 @@ export default function Home() {
 
                 <InfractionForm data={infractionForm} onChange={setInfractionForm} />
 
-                <Pressable
+                <TouchableScale
                   disabled={!canAnalyze || state.status === 'loading'}
                   onPress={handleStartAnalysis}
-                  className={`mt-6 rounded-xl py-4 ${
-                    canAnalyze && state.status !== 'loading' ? 'bg-amber-400' : 'bg-slate-800'
-                  }`}
                 >
-                  <Text
-                    className={`text-center text-sm font-semibold ${
-                      canAnalyze && state.status !== 'loading'
-                        ? 'text-slate-900'
-                        : 'text-slate-500'
+                  <View
+                    className={`mt-6 rounded-xl py-4 ${
+                      canAnalyze && state.status !== 'loading' ? 'bg-amber-400' : 'bg-slate-800'
                     }`}
                   >
-                    {state.status === 'loading' ? 'Analisando…' : 'Iniciar análise técnica'}
-                  </Text>
-                </Pressable>
+                    <Text
+                      className={`text-center text-sm font-semibold ${
+                        canAnalyze && state.status !== 'loading'
+                          ? 'text-slate-900'
+                          : 'text-slate-500'
+                      }`}
+                    >
+                      {state.status === 'loading' ? 'Analisando…' : 'Iniciar análise técnica'}
+                    </Text>
+                  </View>
+                </TouchableScale>
               </ScrollView>
             </KeyboardAvoidingView>
           </View>
@@ -289,31 +355,37 @@ export default function Home() {
             </Text>
 
             <View className="flex-row gap-3 mt-5">
-              <Pressable
+              <TouchableScale
                 disabled={isDeletingProfile}
                 onPress={() => setConfirmDeleteOpen(false)}
-                className={`flex-1 rounded-xl py-3 border active:opacity-70 ${tc.buttonSecondary}`}
+                style={{ flex: 1 }}
               >
-                <Text className={`text-center text-sm font-semibold ${tc.buttonSecondaryText}`}>
-                  Cancelar
-                </Text>
-              </Pressable>
+                <View className={`rounded-xl py-3 border ${tc.buttonSecondary}`}>
+                  <Text className={`text-center text-sm font-semibold ${tc.buttonSecondaryText}`}>
+                    Cancelar
+                  </Text>
+                </View>
+              </TouchableScale>
 
-              <Pressable
+              <TouchableScale
                 disabled={isDeletingProfile}
                 onPress={handleConfirmDelete}
-                className={`flex-1 rounded-xl py-3 ${
-                  isDeletingProfile ? 'bg-slate-800' : 'bg-red-500'
-                } active:opacity-80`}
+                style={{ flex: 1 }}
               >
-                <Text
-                  className={`text-center text-sm font-semibold ${
-                    isDeletingProfile ? 'text-slate-500' : 'text-white'
+                <View
+                  className={`rounded-xl py-3 ${
+                    isDeletingProfile ? 'bg-slate-800' : 'bg-red-500'
                   }`}
                 >
-                  {isDeletingProfile ? 'Excluindo…' : 'Excluir'}
-                </Text>
-              </Pressable>
+                  <Text
+                    className={`text-center text-sm font-semibold ${
+                      isDeletingProfile ? 'text-slate-500' : 'text-white'
+                    }`}
+                  >
+                    {isDeletingProfile ? 'Excluindo…' : 'Excluir'}
+                  </Text>
+                </View>
+              </TouchableScale>
             </View>
           </View>
         </View>
@@ -331,11 +403,6 @@ export default function Home() {
         </View>
       </Modal>
 
-      <NotificationsModal
-        visible={notificationsOpen}
-        onClose={() => setNotificationsOpen(false)}
-        unreadItems={unreadStatusItems}
-      />
     </View>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -63,15 +63,61 @@ const AUTO_VEHICLE_FROM_DOCUMENT: VehicleProfile = {
 };
 
 type Props = {
+  isOpen: boolean;
   onClose: () => void;
 };
 
-export default function DocumentsSheet({ onClose }: Props) {
-  const { profile, saveProfile } = useTechnicalProfile();
+export default function DocumentsSheet({ isOpen, onClose }: Props) {
+  const { profile, saveProfile, clearProfile } = useTechnicalProfile();
   const tc = useThemeClasses();
   const [isApplyingDriver, setIsApplyingDriver] = useState(false);
   const [isApplyingVehicle, setIsApplyingVehicle] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [hasApplied, setHasApplied] = useState(false);
+
+  const initialProfileRef = useRef<TechnicalProfile | null>(null);
+  const hasSnapshotRef = useRef(false);
+  const prevOpenRef = useRef(false);
+
+  useEffect(() => {
+    const wasOpen = prevOpenRef.current;
+    prevOpenRef.current = isOpen;
+
+    if (isOpen && !wasOpen) {
+      initialProfileRef.current = profile ?? null;
+      hasSnapshotRef.current = true;
+      setFeedback(null);
+      setHasApplied(false);
+      setIsApplyingDriver(false);
+      setIsApplyingVehicle(false);
+    }
+  }, [isOpen, profile]);
+
+  async function handleCancel() {
+    try {
+      if (hasApplied && hasSnapshotRef.current) {
+        if (initialProfileRef.current) {
+          await saveProfile(initialProfileRef.current);
+        } else {
+          await clearProfile();
+        }
+      }
+    } finally {
+      setFeedback(null);
+      setHasApplied(false);
+      setIsApplyingDriver(false);
+      setIsApplyingVehicle(false);
+      onClose();
+    }
+  }
+
+  function handleSaveAndClose() {
+    setFeedback('Dados salvos com sucesso.');
+    setTimeout(() => {
+      setFeedback(null);
+      onClose();
+    }, 800);
+  }
 
   async function applyDriverFromDocument() {
     if (isApplyingDriver) return;
@@ -96,6 +142,7 @@ export default function DocumentsSheet({ onClose }: Props) {
 
       await saveProfile(updated);
       setFeedback('Dados do condutor preenchidos automaticamente a partir do documento.');
+      setHasApplied(true);
     } finally {
       setIsApplyingDriver(false);
       setTimeout(() => setFeedback(null), 2000);
@@ -125,6 +172,7 @@ export default function DocumentsSheet({ onClose }: Props) {
 
       await saveProfile(updated);
       setFeedback('Dados do veículo preenchidos automaticamente a partir do documento.');
+      setHasApplied(true);
     } finally {
       setIsApplyingVehicle(false);
       setTimeout(() => setFeedback(null), 2000);
@@ -162,14 +210,20 @@ export default function DocumentsSheet({ onClose }: Props) {
                 Preenchimento com documentos
               </Text>
 
-              <Pressable onPress={onClose}>
-                <Text className={`text-sm ${tc.textSubtle}`}>
+              <Pressable
+                onPress={handleCancel}
+                disabled={isApplyingDriver || isApplyingVehicle}
+              >
+                <Text
+                  className={`text-sm ${tc.textSubtle}`}
+                  style={{ opacity: isApplyingDriver || isApplyingVehicle ? 0.5 : 1 }}
+                >
                   Cancelar
                 </Text>
               </Pressable>
             </View>
 
-            <Text className={`mt-1 text-sm ${tc.textSubtle}`}>
+            <Text className={`mt-2 text-base leading-relaxed ${tc.textSubtle}`}>
               Use a CNH e o documento do veículo para preencher ou atualizar o cadastro técnico.
             </Text>
           </View>
@@ -186,7 +240,7 @@ export default function DocumentsSheet({ onClose }: Props) {
                   <Text className={`font-semibold text-base ${tc.text}`}>
                     CNH — dados do condutor
                   </Text>
-                  <Text className={`${tc.textMuted} text-xs mt-0.5`}>
+                  <Text className={`${tc.textMuted} text-sm mt-1 leading-relaxed`}>
                     Leia as informações da CNH para preencher automaticamente nome,
                     CPF, CNH, categoria e validade.
                   </Text>
@@ -230,7 +284,7 @@ export default function DocumentsSheet({ onClose }: Props) {
                   <Text className={`font-semibold text-base ${tc.text}`}>
                     Documento do veículo
                   </Text>
-                  <Text className={`${tc.textMuted} text-xs mt-0.5`}>
+                  <Text className={`${tc.textMuted} text-sm mt-1 leading-relaxed`}>
                     Use o CRLV/CRV para preencher placa, RENAVAM, marca, modelo,
                     município, UF e CPF do proprietário.
                   </Text>
@@ -263,6 +317,29 @@ export default function DocumentsSheet({ onClose }: Props) {
                 </Text>
               </Pressable>
             </View>
+
+            {/* BOTÃO SALVAR DADOS */}
+            <Pressable
+              onPress={handleSaveAndClose}
+              disabled={isApplyingDriver || isApplyingVehicle}
+              className={`mt-4 rounded-xl py-4 flex-row items-center justify-center gap-2 active:opacity-90 ${
+                isApplyingDriver || isApplyingVehicle
+                  ? 'bg-slate-700 border border-slate-600'
+                  : 'bg-amber-400 border border-amber-500'
+              }`}
+            >
+              <Ionicons
+                name="checkmark-circle-outline"
+                size={20}
+                color={isApplyingDriver || isApplyingVehicle ? '#9ca3af' : '#022c22'}
+              />
+              <Text
+                className="text-base font-semibold"
+                style={{ color: isApplyingDriver || isApplyingVehicle ? '#9ca3af' : '#022c22' }}
+              >
+                Salvar dados
+              </Text>
+            </Pressable>
 
             {/* INFO SOBRE MULTA (futuro) */}
             <View className="mt-2 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4">

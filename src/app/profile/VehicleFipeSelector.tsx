@@ -1,5 +1,6 @@
 import { View, Text } from 'react-native';
 import Input from './Input';
+import { useThemeClasses } from '../../context/ThemeContext';
 
 export interface VehicleFipeData {
   brand: string;
@@ -13,9 +14,10 @@ export default function VehicleFipeSelector({
   value: VehicleFipeData;
   onChange: (v: VehicleFipeData) => void;
 }) {
+  const tc = useThemeClasses();
   return (
     <View className="gap-4">
-      <Text className="text-base font-semibold text-white">
+      <Text className={`text-base font-semibold ${tc.text}`}>
         Identificação do veículo
       </Text>
 

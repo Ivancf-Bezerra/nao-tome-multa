@@ -69,7 +69,7 @@ export default function TechnicalExtractModal({
           </Pressable>
         </View>
 
-        <Text className="mb-6 text-sm text-slate-500">
+        <Text className="mb-6 text-base leading-relaxed text-slate-500">
           Resumo formal com base nos dados informados
           manualmente.
         </Text>
@@ -78,7 +78,7 @@ export default function TechnicalExtractModal({
         <ScrollView
           showsVerticalScrollIndicator={false}
         >
-          <View className="mb-4">
+          <View className="mb-5">
             <Text className="text-xs uppercase tracking-wide text-slate-400">
               Infrações analisadas
             </Text>
@@ -87,7 +87,7 @@ export default function TechnicalExtractModal({
             </Text>
           </View>
 
-          <View className="mb-4">
+          <View className="mb-5">
             <Text className="text-xs uppercase tracking-wide text-slate-400">
               Achados técnicos
             </Text>

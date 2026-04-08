@@ -8,6 +8,7 @@ import {
   Platform,
   Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
@@ -17,6 +18,8 @@ import {
   useTechnicalProfile,
   TechnicalProfile,
 } from '../../context/TechnicalProfileContext';
+import { useThemeClasses } from '../../context/ThemeContext';
+import TouchableScale from '../../components/ui/TouchableScale';
 
 import DriverForm, { DriverData } from './DriverForm';
 import VehicleForm, { VehicleData } from './VehicleForm';
@@ -55,6 +58,7 @@ const INITIAL_VEHICLE: VehicleData = __DEV__ ? { ...SAMPLE_VEHICLE } : EMPTY_VEH
 export default function TechnicalProfileScreen() {
   const router = useRouter();
   const { profile, saveProfile } = useTechnicalProfile();
+  const tc = useThemeClasses();
 
   const [step, setStep] = useState<Step>('driver');
 
@@ -163,13 +167,19 @@ export default function TechnicalProfileScreen() {
     handleSave();
   }
 
+  function handleBack() {
+    if (step === 'vehicle') {
+      setStep('driver');
+    }
+  }
+
   /* =======================
      RENDER
      ======================= */
 
   return (
-    <View className="flex-1 bg-black/50">
-      <StatusBar style="light" />
+    <View className={`flex-1 ${tc.modalOverlay}`}>
+      <StatusBar style={tc.statusBar} />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -177,26 +187,26 @@ export default function TechnicalProfileScreen() {
       >
         <SafeAreaView
           edges={['bottom']}
-          className="flex-1 rounded-t-3xl bg-slate-900"
+          className={`flex-1 rounded-t-3xl ${tc.modalBg} ${tc.border}`}
           style={{ maxHeight: SHEET_MAX_HEIGHT }}
         >
           {/* HEADER */}
-          <View className="border-b border-slate-800 px-6 pt-4 pb-4">
-            <View className="mb-3 h-1 w-10 self-center rounded-full bg-slate-600" />
+          <View className={`border-b px-6 pt-4 pb-4 ${tc.borderB}`}>
+            <View className={`mb-3 h-1 w-10 self-center rounded-full ${tc.divider}`} />
 
             <View className="flex-row items-center justify-between">
-              <Text className="text-base font-semibold text-white">
+              <Text className={`text-base font-semibold ${tc.text}`}>
                 Cadastro técnico
               </Text>
 
               <Pressable onPress={() => router.back()}>
-                <Text className="text-sm text-slate-500">
+                <Text className={`text-sm ${tc.textSubtle}`}>
                   Fechar
                 </Text>
               </Pressable>
             </View>
 
-            <Text className="mt-1 text-sm text-slate-500">
+            <Text className={`mt-1 text-sm ${tc.textSubtle}`}>
               Informe os dados conforme constam nos documentos oficiais.
             </Text>
           </View>
@@ -217,28 +227,46 @@ export default function TechnicalProfileScreen() {
           </ScrollView>
 
           {/* FOOTER */}
-          <View className="border-t border-slate-800 px-6 py-4">
-            <Pressable
-              disabled={step === 'driver' ? !canGoNext : !canSave}
-              onPress={handlePrimaryAction}
-              className={`rounded-xl py-4 ${
-                (step === 'driver' ? canGoNext : canSave)
-                  ? 'bg-amber-400'
-                  : 'bg-slate-800'
-              }`}
-            >
-              <Text
-                className={`text-center text-sm font-semibold ${
-                  (step === 'driver' ? canGoNext : canSave)
-                    ? 'text-slate-900'
-                    : 'text-slate-500'
-                }`}
+          <View className={`px-6 py-4 ${tc.borderT}`}>
+            <View className="flex-row gap-3">
+              {step === 'vehicle' && (
+                <TouchableScale onPress={handleBack} style={{ flex: 1 }}>
+                  <View
+                    className={`flex-row items-center justify-center gap-2 rounded-xl py-4 border ${tc.buttonSecondary}`}
+                  >
+                    <Ionicons name="arrow-back" size={18} color={tc.iconMuted} />
+                    <Text className={`text-sm font-semibold ${tc.buttonSecondaryText}`}>
+                      Voltar
+                    </Text>
+                  </View>
+                </TouchableScale>
+              )}
+              <TouchableScale
+                disabled={step === 'driver' ? !canGoNext : !canSave}
+                onPress={handlePrimaryAction}
+                style={{ flex: 1 }}
               >
-                {step === 'driver'
-                  ? 'Continuar para dados do veículo'
-                  : 'Salvar cadastro técnico'}
-              </Text>
-            </Pressable>
+                <View
+                  className={`rounded-xl py-4 ${
+                    (step === 'driver' ? canGoNext : canSave)
+                      ? 'bg-amber-400'
+                      : tc.buttonDisabled
+                  }`}
+                >
+                  <Text
+                    className={`text-center text-sm font-semibold ${
+                      (step === 'driver' ? canGoNext : canSave)
+                        ? 'text-slate-900'
+                        : tc.buttonDisabledText
+                    }`}
+                  >
+                    {step === 'driver'
+                      ? 'Continuar para dados do veículo'
+                      : 'Salvar cadastro técnico'}
+                  </Text>
+                </View>
+              </TouchableScale>
+            </View>
           </View>
         </SafeAreaView>
       </KeyboardAvoidingView>

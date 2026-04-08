@@ -71,7 +71,8 @@ export function useTheme(): ThemeContextData {
 export function useThemeClasses() {
   const { isDark } = useTheme();
   return {
-    screen: isDark ? 'bg-slate-900' : 'bg-white',
+    // Fundo base das telas (Passo 6: tema claro em cinza muito claro)
+    screen: isDark ? 'bg-slate-900' : 'bg-slate-50',
     screenGradient: isDark ? ['#0f172a', '#1e293b'] as const : ['#f8fafc', '#e2e8f0'] as const,
     card: isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200',
     cardAlt: isDark ? 'bg-slate-900/80 border border-slate-800' : 'bg-slate-50 border border-slate-200',
@@ -81,6 +82,7 @@ export function useThemeClasses() {
     border: isDark ? 'border border-slate-700' : 'border border-slate-200',
     borderAlt: isDark ? 'border border-slate-800' : 'border border-slate-200',
     borderB: isDark ? 'border-b border-slate-800' : 'border-b border-slate-200',
+    borderT: isDark ? 'border-t border-slate-800' : 'border-t border-slate-200',
     input: isDark ? 'bg-slate-800' : 'bg-slate-50',
     inputBorder: isDark ? 'border-slate-700' : 'border-slate-300',
     inputFocusBorder: isDark ? 'border-slate-500' : 'border-slate-600',
@@ -96,5 +98,8 @@ export function useThemeClasses() {
     divider: isDark ? 'bg-slate-700' : 'bg-slate-300',
     tabActiveBg: isDark ? 'bg-slate-700' : 'bg-slate-200',
     statusBar: isDark ? 'light' as const : 'dark' as const,
+    chipUnselected: isDark ? 'bg-neutral-900 border border-neutral-700 text-neutral-300' : 'bg-slate-100 border border-slate-300 text-slate-700',
+    buttonDisabled: isDark ? 'bg-slate-800' : 'bg-slate-300',
+    buttonDisabledText: isDark ? 'text-slate-500' : 'text-slate-500',
   };
 }
